@@ -3167,7 +3167,7 @@ class HellDivers2ToolsPanel(Panel):
 
         # Draw Archive Import/Export Buttons
         row = layout.row(); row = layout.row()
-        row.operator("helldiver2.archive_import_default", icon= 'IMPORT', text="")
+        row.operator("helldiver2.archive_import_default", icon= 'SOLO_ON', text="")
         row.operator("helldiver2.archive_import", icon= 'IMPORT').is_patch = False
         row.operator("helldiver2.archive_unloadall", icon= 'FILE_REFRESH', text="")
         row = layout.row()
