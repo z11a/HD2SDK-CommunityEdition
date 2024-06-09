@@ -885,7 +885,8 @@ class TocManager():
         self.LoadedArchives = []
         self.ActiveArchive  = None
         self.SearchArchives = []
-        batchLoadArchive()
+        archivesList = ["8313c9a556b8ee85"]
+        batchLoadArchive(archivesList, True)
 
     def SetActive(self, Archive):
         if Archive != self.ActiveArchive:
@@ -2331,7 +2332,20 @@ def SaveStingrayMesh(ID, TocData, GpuData, StreamData, StingrayMesh):
 #endregion
 
 #region Operators: Archives & Patches
+class DefaultLoadArchiveOperator(Operator):
+    bl_label = "Load Default Archive"
+    bl_idname = "helldiver2.archive_import_default"
 
+    def execute(self, context):
+        item = ["9ba626afa44a3aa3"]
+        batchLoadArchive(item, False)
+
+        # Redraw
+        for area in context.screen.areas:
+            if area.type == "VIEW_3D": area.tag_redraw()
+        
+        return{'FINISHED'}
+    
 class LoadArchiveOperator(Operator, ImportHelper):
     bl_label = "Load Archive"
     bl_idname = "helldiver2.archive_import"
@@ -3155,6 +3169,7 @@ class HellDivers2ToolsPanel(Panel):
 
         # Draw Archive Import/Export Buttons
         row = layout.row(); row = layout.row()
+        row.operator("helldiver2.archive_import_default", icon= 'IMPORT', text="")
         row.operator("helldiver2.archive_import", icon= 'IMPORT').is_patch = False
         row.operator("helldiver2.archive_unloadall", icon= 'FILE_REFRESH', text="")
         row = layout.row()
@@ -3440,6 +3455,7 @@ classes = (
     RenamePatchEntryOperator,
     DuplicateEntryOperator,
     SetEntryFriendlyNameOperator,
+    DefaultLoadArchiveOperator,
     BulkLoadOperator,
 )
 
@@ -3467,26 +3483,25 @@ if __name__=="__main__":
 
 
 
-def batchLoadArchive():
-    archivesList = ["8313c9a556b8ee85"]
-    for item in archivesList:
+def batchLoadArchive(list, loadMeshes):
+    for item in list:
         basePath = "C:/Program Files (x86)/Steam/steamapps/common/Helldivers 2/data/"
         path = basePath + item
 
         meshes = []
         textures = []
         testArch = Global_TocManager.LoadArchive(str(path), True, False)
-        for element in testArch.TocEntries:
-            if element.TypeID == 1792059921637536489 or element.TypeID == 16187218042980615487:
-                meshes.append(element)
-            if element.TypeID == 14790446551990181426:
-                textures.append(element)
-            
-            print(element.TypeID, element.FileID)
+        if(loadMeshes):
+            for element in testArch.TocEntries:
+                if element.TypeID == 1792059921637536489 or element.TypeID == 16187218042980615487:
+                    meshes.append(element)
+                if element.TypeID == 14790446551990181426:
+                    textures.append(element)
+                
 
-        for meshElement in meshes:
-            print(meshElement.FileID)
-            loadMeshes(meshElement.FileID)
+            for meshElement in meshes:
+                print(meshElement.FileID)
+                loadMeshes(meshElement.FileID)
 
         #screenshot loaded stuff
         #time.sleep(1)
