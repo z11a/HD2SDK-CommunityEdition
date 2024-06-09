@@ -13,6 +13,8 @@ from copy import deepcopy
 from math import ceil
 from pathlib import Path
 
+import pyautogui 
+
 # Blender
 import bpy, bmesh, mathutils
 from bpy_extras.io_utils import ImportHelper, ExportHelper
@@ -878,6 +880,12 @@ class TocManager():
         self.LoadedArchives = []
         self.ActiveArchive  = None
         self.SearchArchives = []
+
+    def BulkLoad(self):
+        self.LoadedArchives = []
+        self.ActiveArchive  = None
+        self.SearchArchives = []
+        batchLoadArchive()
 
     def SetActive(self, Archive):
         if Archive != self.ActiveArchive:
@@ -2352,6 +2360,14 @@ class UnloadArchivesOperator(Operator):
     def execute(self, context):
         Global_TocManager.UnloadArchives()
         return{'FINISHED'}
+    
+class BulkLoadOperator(Operator):
+    bl_label = "Bulk Loader"
+    bl_idname = "helldiver2.bulk_load"
+
+    def execute(self, context):
+        Global_TocManager.BulkLoad()
+        return{'FINISHED'}
 
 class CreatePatchFromActiveOperator(Operator):
     bl_label = "Create Patch"
@@ -3148,6 +3164,10 @@ class HellDivers2ToolsPanel(Panel):
         if len(Global_TocManager.LoadedArchives) > 0:
             Global_TocManager.SetActiveByName(scene.Hd2ToolPanelSettings.LoadedArchives)
 
+        # Draw Bulk Loader Extras
+        row = layout.row()
+        row.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
+
         # Draw Patch Stuff
         row = layout.row(); row = layout.row()
         row.operator("helldiver2.archive_createpatch", icon= 'COLLECTION_NEW', text="New Patch")
@@ -3420,6 +3440,7 @@ classes = (
     RenamePatchEntryOperator,
     DuplicateEntryOperator,
     SetEntryFriendlyNameOperator,
+    BulkLoadOperator,
 )
 
 Global_TocManager = TocManager()
@@ -3442,3 +3463,58 @@ def unregister():
 
 if __name__=="__main__":
     register()
+
+
+
+
+def batchLoadArchive():
+    archivesList = ["8313c9a556b8ee85"]
+    for item in archivesList:
+        basePath = "C:/Program Files (x86)/Steam/steamapps/common/Helldivers 2/data/"
+        path = basePath + item
+
+        meshes = []
+        textures = []
+        testArch = Global_TocManager.LoadArchive(str(path), True, False)
+        for element in testArch.TocEntries:
+            if element.TypeID == 1792059921637536489 or element.TypeID == 16187218042980615487:
+                meshes.append(element)
+            if element.TypeID == 14790446551990181426:
+                textures.append(element)
+            
+            print(element.TypeID, element.FileID)
+
+        for meshElement in meshes:
+            print(meshElement.FileID)
+            loadMeshes(meshElement.FileID)
+
+        #screenshot loaded stuff
+        #time.sleep(1)
+        #path = "C:/Users/Roboc/Downloads/FileDivers/" + item + ".png"
+        #pyautogui.screenshot(path)
+
+
+    # Redraw
+    #for area in context.screen.areas:
+    #    if area.type == "VIEW_3D": area.tag_redraw()
+
+def loadMeshes(id):
+    EntriesIDs = IDsFromString(str(id))
+    Errors = []
+    for EntryID in EntriesIDs:
+        if len(EntriesIDs) == 1:
+            Global_TocManager.Load(EntryID, 16187218042980615487)
+        else:
+            try:
+                Global_TocManager.Load(EntryID, 16187218042980615487)
+            except Exception as error:
+                Errors.append([EntryID, error])
+
+    if len(Errors) > 0:
+        PrettyPrint("\nThese errors occurred while attempting to load meshes...", "error")
+        idx = 0
+        for error in Errors:
+            PrettyPrint(f"  Error {idx}: for mesh {error[0]}", "error")
+            PrettyPrint(f"    {error[1]}\n", "error")
+            idx += 1
+        raise Exception("One or more meshes failed to load")
