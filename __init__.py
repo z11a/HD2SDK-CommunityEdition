@@ -2332,7 +2332,7 @@ def SaveStingrayMesh(ID, TocData, GpuData, StreamData, StingrayMesh):
 #region Operators: Archives & Patches
 class DefaultLoadArchiveOperator(Operator):
     bl_label = "Load Default Archive"
-    bl_description = "Loades the bases archive that patches should be built upon"
+    bl_description = "Loads the bases archive that patches should be built upon"
     bl_idname = "helldiver2.archive_import_default"
 
     def execute(self, context):
