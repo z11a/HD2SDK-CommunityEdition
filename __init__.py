@@ -882,9 +882,7 @@ class TocManager():
         self.SearchArchives = []
 
     def BulkLoad(self):
-        self.LoadedArchives = []
-        self.ActiveArchive  = None
-        self.SearchArchives = []
+        self.UnloadArchives()
         archivesList = ["8313c9a556b8ee85"]
         batchLoadArchive(archivesList, True)
 
