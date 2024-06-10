@@ -21,7 +21,9 @@ Boxed Edition aims to bring quality of life features to the Helldivers 2 Modding
 The developers of the original version of the tool have stated that they are unlikely to update it. Therefore, this community version of it has been made to bring quality of life features and to fix issues with the base version of the tool.
 
 ## Installation
-Download the [latest release build](https://github.com/Boxofbiscuits97/io_scene_helldivers2/releases) and install it into [Blender 4.0](https://www.blender.org/download/previous-versions/). <ins>**You MUST use version 4.0**</ins> due to API changes is 4.1 onward that break the tool. Windows is the only supported operating system.
+Download the [latest release build](https://github.com/Boxofbiscuits97/io_scene_helldivers2/releases) and install it into [Blender 4.0](https://www.blender.org/download/previous-versions/). Windows is the only supported operating system.
+> [!IMPORTANT]
+> <ins>**You MUST use Blender 4.0**</ins> due to API changes is Blender 4.1 and onward that break the tool.
 
 ## Usage
 We've taken the time to write a tutorial focused on armor modding which should assist those already moderately familiar with mesh modding and Blender in general. Unfortunately we do not have the means to provide constant support to anyone new to either, but in the event anyone should write a more in-depth tutorial, create a video tutorial, etc, we would be happy to feature it here if it's brought to our attention.
@@ -30,8 +32,10 @@ We've taken the time to write a tutorial focused on armor modding which should a
 - [Original Google Docs Tutorial](https://docs.google.com/document/d/1SF7iEekmxoDdf0EsJu1ww9u2Cr8vzHyn2ycZS7JlWl0)
 - [Arhicves ID Spreadsheet](https://docs.google.com/spreadsheets/d/1oQys_OI5DWou4GeRE3mW56j7BIi4M7KftBIPAl1ULFw)
 - [Early Youtube Tutorial for Models](https://youtu.be/jdz-JeLvCY4)
-- [Original Creators Discord](https://discord.gg/ftSZppf)
-- [Community Discord for **Boxed Edition**](https://discord.gg/Nzdc7z8Awr)
+
+### Discords
+- [Community Discord](https://discord.gg/Nzdc7z8Awr) for support with **Boxed Edition** and community tools
+- [Toasted Discord](https://discord.gg/ftSZppf) for the original addon creators
 
 
 
