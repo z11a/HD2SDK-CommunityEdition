@@ -3189,8 +3189,8 @@ class HellDivers2ToolsPanel(Panel):
             Global_TocManager.SetActiveByName(scene.Hd2ToolPanelSettings.LoadedArchives)
 
         # Draw Bulk Loader Extras
-        row = layout.row()
-        row.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
+        #row = layout.row()
+        #row.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
 
         # Draw Patch Stuff
         row = layout.row(); row = layout.row()
