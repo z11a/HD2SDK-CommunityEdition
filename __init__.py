@@ -2369,7 +2369,6 @@ class LoadArchiveOperator(Operator, ImportHelper):
     bl_description = "Imports Archive from Helldivers Data Folder"
 
     filter_glob: StringProperty(default='*', options={'HIDDEN'})
-
     is_patch: BoolProperty(name="is_patch", default=False, options={'HIDDEN'})
 
     def __init__(self):
@@ -3060,6 +3059,38 @@ class SelectAllOfTypeOperator(Operator):
                 else:
                     Global_TocManager.SelectEntries([Entry], True)
         return{'FINISHED'}
+    
+class ImportAllOfTypeOperator(Operator):
+    bl_label  = "Import All Of Type"
+    bl_idname = "helldiver2.import_type"
+
+    object_typeid: StringProperty()
+    def execute(self, context):
+        Entries = GetDisplayData()[0]
+        for EntryInfo in Entries:
+            Entry = EntryInfo[0]
+            #if Entry.TypeID == int(self.object_typeid):
+            DisplayEntry = Global_TocManager.GetEntry(Entry.FileID, Entry.TypeID)
+            objectid = str(DisplayEntry.FileID)
+
+            if DisplayEntry.TypeID == MeshID or DisplayEntry.TypeID == CompositeMeshID:
+                EntriesIDs = IDsFromString(objectid)
+                for EntryID in EntriesIDs:
+                    try:
+                        Global_TocManager.Load(EntryID, MeshID)
+                    except Exception as error:
+                        self.report({'ERROR'},[EntryID, error])
+
+            elif DisplayEntry.TypeID == TexID:
+                print("tex")
+                #operator = bpy.ops.helldiver2.texture_import(object_id=objectid)
+                #ImportTextureOperator.execute(operator, operator)
+
+            elif DisplayEntry.TypeID == MaterialID:
+                print("mat")
+                #operator = bpy.ops.helldiver2.material_import(object_id=objectid)
+                #ImportMaterialOperator.execute(operator, operator)
+        return{'FINISHED'}
 
 class SetEntryFriendlyNameOperator(Operator):
     bl_label = "Set Friendly Name"
@@ -3306,6 +3337,7 @@ class HellDivers2ToolsPanel(Panel):
                 sub = split.row(align=True)
                 sub.label(text=typeName+": "+str(Type.TypeID), icon=type_icon)
                 
+                #sub.operator("helldiver2.import_type", icon='IMPORT', text="").object_typeid = str(Type.TypeID)
                 sub.operator("helldiver2.select_type", icon='RESTRICT_SELECT_OFF', text="").object_typeid = str(Type.TypeID)
                 # Draw Add Material Button
                 
