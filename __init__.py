@@ -1,5 +1,6 @@
 bl_info = {
-    "name": "Helldivers 2 Archives",
+    "name": "Helldivers 2 Archives: Boxed Edition",
+    "version": (1, 0, 0),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -880,6 +881,10 @@ class TocManager():
         self.LoadedArchives = []
         self.ActiveArchive  = None
         self.SearchArchives = []
+    
+    def UnloadPatches(self):
+        self.Patches = []
+        self.ActivePatch = None
 
     def BulkLoad(self):
         self.UnloadArchives()
@@ -2328,6 +2333,19 @@ def SaveStingrayMesh(ID, TocData, GpuData, StreamData, StingrayMesh):
     return [toc.Data, gpu.Data, b""]
 
 #endregion
+def ArchivesNotLoaded(self):
+    if len(Global_TocManager.LoadedArchives) <= 0:
+        self.report({'ERROR'}, "No Archives Currently Loaded")
+        return True
+    else: 
+        return False
+    
+def PatchesNotLoaded(self):
+    if len(Global_TocManager.Patches) <= 0:
+        self.report({'ERROR'}, "No Patches Currently Loaded")
+        return True
+    else:
+        return False
 
 #region Operators: Archives & Patches
 class DefaultLoadArchiveOperator(Operator):
@@ -2379,6 +2397,15 @@ class UnloadArchivesOperator(Operator):
         Global_TocManager.UnloadArchives()
         return{'FINISHED'}
     
+class UnloadPatchesOperator(Operator):
+    bl_label = "Unload Patches"
+    bl_idname = "helldiver2.patches_unloadall"
+    bl_description = "Unloads All Current Loaded Patches"
+
+    def execute(self, context):
+        Global_TocManager.UnloadPatches()
+        return{'FINISHED'}
+    
 class BulkLoadOperator(Operator):
     bl_label = "Bulk Loader"
     bl_idname = "helldiver2.bulk_load"
@@ -2393,6 +2420,9 @@ class CreatePatchFromActiveOperator(Operator):
     bl_description = "Creates Patch from Current Active Archive"
 
     def execute(self, context):
+        if ArchivesNotLoaded(self):
+            return{'CANCELLED'}
+        
         Global_TocManager.CreatePatchFromActive()
 
         # Redraw
@@ -2408,6 +2438,9 @@ class PatchArchiveOperator(Operator):
 
     def execute(self, context):
         global Global_TocManager
+        if PatchesNotLoaded(self):
+            return{'CANCELLED'}
+        
         Global_TocManager.PatchActiveArchive()
         return{'FINISHED'}
 
@@ -2457,6 +2490,9 @@ class AddEntryToPatchOperator(Operator):
     object_id: StringProperty()
     object_typeid: StringProperty()
     def execute(self, context):
+        if PatchesNotLoaded(self):
+            return{'CANCELLED'}
+        
         Entries = EntriesFromStrings(self.object_id, self.object_typeid)
         for Entry in Entries:
             Global_TocManager.AddEntryToPatch(Entry.FileID, Entry.TypeID)
@@ -2627,6 +2663,8 @@ class SaveStingrayMeshOperator(Operator):
 
     object_id: StringProperty()
     def execute(self, context):
+        if PatchesNotLoaded(self):
+            return {'CANCELLED'}
         Global_TocManager.Save(int(self.object_id), MeshID)
         return{'FINISHED'}
 
@@ -2667,6 +2705,8 @@ class SaveTextureFromBlendImageOperator(Operator):
 
     object_id: StringProperty()
     def execute(self, context):
+        if PatchesNotLoaded(self):
+            return {'CANCELLED'}
         Entries = EntriesFromString(self.object_id, TexID)
         for Entry in Entries:
             if Entry != None:
@@ -2782,6 +2822,8 @@ class SaveMaterialOperator(Operator):
 
     object_id: StringProperty()
     def execute(self, context):
+        if PatchesNotLoaded(self):
+            return {'CANCELLED'}
         EntriesIDs = IDsFromString(self.object_id)
         for EntryID in EntriesIDs:
             Global_TocManager.Save(int(EntryID), MaterialID)
@@ -2801,6 +2843,7 @@ class ImportMaterialOperator(Operator):
 class AddMaterialOperator(Operator):
     bl_label = "Add Material"
     bl_idname = "helldiver2.material_add"
+    bl_description = "Adds a New Material to Current Active Patch"
 
     materials = (
         ("original", "Original", "The original template used for all mods uploaded to Nexus prior to the addon's public release, which is bloated with additional unnecessary textures. Sourced from a terminid."),
@@ -2811,6 +2854,9 @@ class AddMaterialOperator(Operator):
     selected_material: EnumProperty(items=materials, name="Template", default=1)
 
     def execute(self, context):
+        if PatchesNotLoaded(self):
+            return {'CANCELLED'}
+        
         Entry = TocEntry()
         Entry.FileID = r.randint(1, 0xffffffffffffffff)
         Entry.TypeID = MaterialID
@@ -3098,7 +3144,7 @@ class Hd2ToolPanelSettings(PropertyGroup):
     SearchField : StringProperty(default = "")
 
 class HellDivers2ToolsPanel(Panel):
-    bl_label = "Helldivers 2"
+    bl_label = f"Helldivers 2 Archives: Boxed Edition v{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}"
     bl_idname = "SF_PT_Tools"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -3195,15 +3241,9 @@ class HellDivers2ToolsPanel(Panel):
         # Draw Patch Stuff
         row = layout.row(); row = layout.row()
 
-        sub = row.row()
-        archivesLoaded = len(Global_TocManager.LoadedArchives) > 0
-        sub.enabled = archivesLoaded
-        sub.operator("helldiver2.archive_createpatch", icon= 'COLLECTION_NEW', text="New Patch")
-
-        sub = row.row()
-        patchesLoaded = len(Global_TocManager.Patches) > 0
-        sub.enabled = patchesLoaded
-        sub.operator("helldiver2.archive_export", icon= 'DISC', text="Write Patch")
+        row.operator("helldiver2.archive_createpatch", icon= 'COLLECTION_NEW', text="New Patch")
+        row.operator("helldiver2.archive_export", icon= 'DISC', text="Write Patch")
+        row.operator("helldiver2.patches_unloadall", icon= 'FILE_REFRESH', text="")
 
         row = layout.row()
         row.prop(scene.Hd2ToolPanelSettings, "Patches", text="Patches")
@@ -3261,10 +3301,15 @@ class HellDivers2ToolsPanel(Panel):
                 # Draw Type Header
                 box = layout.box(); row = box.row()
                 typeName = GetTypeNameFromID(Type.TypeID)
-                row.label(text=typeName+": "+str(Type.TypeID), icon=type_icon)
-                row.operator("helldiver2.select_type", icon='RESTRICT_SELECT_OFF', text="").object_typeid = str(Type.TypeID)
+                split = row.split()
+                
+                sub = split.row(align=True)
+                sub.label(text=typeName+": "+str(Type.TypeID), icon=type_icon)
+                
+                sub.operator("helldiver2.select_type", icon='RESTRICT_SELECT_OFF', text="").object_typeid = str(Type.TypeID)
                 # Draw Add Material Button
-                if typeName == "material": row.operator("helldiver2.material_add", icon='FILE_NEW', text="")
+                
+                if typeName == "material": sub.operator("helldiver2.material_add", icon='FILE_NEW', text="")
 
                 # Draw Archive Entries
                 col = box.column()
@@ -3475,6 +3520,8 @@ classes = (
     SetEntryFriendlyNameOperator,
     DefaultLoadArchiveOperator,
     BulkLoadOperator,
+    ImportAllOfTypeOperator,
+    UnloadPatchesOperator,
 )
 
 Global_TocManager = TocManager()
