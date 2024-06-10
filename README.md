@@ -11,7 +11,7 @@ Boxed Edition aims to bring quality of life features to the Helldivers 2 Modding
 ### Features
 - **Descriptions** for all actions in the tool
 - **Default Archive Button** for the one that patches should be made from
-- **Better Error Handeling** for more detailed error messages for when things go wrong
+- **Better Error Handling** for more detailed error messages for when things go wrong
 
 ### Planned
 - **Bulk Scene Importing** for all items in a section
