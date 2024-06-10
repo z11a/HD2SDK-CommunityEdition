@@ -13,7 +13,7 @@ from copy import deepcopy
 from math import ceil
 from pathlib import Path
 
-import pyautogui 
+#import pyautogui 
 
 # Blender
 import bpy, bmesh, mathutils
@@ -3184,9 +3184,13 @@ class HellDivers2ToolsPanel(Panel):
 
         # Draw Patch Stuff
         row = layout.row(); row = layout.row()
-        row.operator("helldiver2.archive_createpatch", icon= 'COLLECTION_NEW', text="New Patch")
-        row.operator("helldiver2.archive_export", icon= 'DISC', text="Write Patch")
+        sub = row.row()
+        sub.operator("helldiver2.archive_createpatch", icon= 'COLLECTION_NEW', text="New Patch")
+        sub = row.row()
+        sub.enabled = len(Global_TocManager.Patches) > 0
+        sub.operator("helldiver2.archive_export", icon= 'DISC', text="Write Patch")
         row = layout.row()
+
         row.prop(scene.Hd2ToolPanelSettings, "Patches", text="Patches")
         if len(Global_TocManager.Patches) > 0:
             Global_TocManager.SetActivePatchByName(scene.Hd2ToolPanelSettings.Patches)
