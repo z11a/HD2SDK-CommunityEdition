@@ -29,7 +29,7 @@ Boxed Edition aims to bring quality of life features to the Helldivers 2 Modding
 
 ### Planned
 - **Bulk Importing** items
-- **Itegrated List** for Archive's
+- **Itegrated List** for Archive's IDs
 
 ## What About the Original Tool?
 The developers of the original version of the tool have stated that they are unlikely to update it. Therefore, this community version of it has been made to bring quality of life features and to fix issues with the base version of the tool.
