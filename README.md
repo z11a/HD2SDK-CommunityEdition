@@ -14,8 +14,9 @@ Boxed Edition aims to bring quality of life features to the Helldivers 2 Modding
 - **Better Error Handeling** for more detailed error messages for when things go wrong
 
 ### Planned
-- **Bulk Importing** items
-- **Itegrated List** for Archive's IDs
+- **Bulk Scene Importing** for all items in a section
+- **Itegrated List** with in game names to load Archive IDs
+- **Better Patch Organization** with naming patches and saving WIP patches 
 
 ### What About the Original Tool?
 The developers of the original version of the tool have stated that they are unlikely to update it. Therefore, this community version of it has been made to bring quality of life features and to fix issues with the base version of the tool.
