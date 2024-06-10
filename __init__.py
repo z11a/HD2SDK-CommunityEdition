@@ -2331,8 +2331,8 @@ def SaveStingrayMesh(ID, TocData, GpuData, StreamData, StingrayMesh):
 
 #region Operators: Archives & Patches
 class DefaultLoadArchiveOperator(Operator):
-    bl_label = "Load Default Archive"
-    bl_description = "Loads the base archive that patches should be built upon"
+    bl_label = "Default Archive"
+    bl_description = "Loads the Default Archive that Patches should be built upon"
     bl_idname = "helldiver2.archive_import_default"
 
     def execute(self, context):
@@ -2348,10 +2348,14 @@ class DefaultLoadArchiveOperator(Operator):
 class LoadArchiveOperator(Operator, ImportHelper):
     bl_label = "Load Archive"
     bl_idname = "helldiver2.archive_import"
+    bl_description = "Imports Archive from Helldivers Data Folder"
 
     filter_glob: StringProperty(default='*', options={'HIDDEN'})
 
     is_patch: BoolProperty(name="is_patch", default=False, options={'HIDDEN'})
+
+    def __init__(self):
+        self.filepath = bpy.path.abspath("C:/Program Files (x86)/Steam/steamapps/common/Helldivers 2/data/")
 
     def execute(self, context):
         # Sanitize path by removing any provided extension, so the correct TOC file is loaded
@@ -2369,6 +2373,7 @@ class LoadArchiveOperator(Operator, ImportHelper):
 class UnloadArchivesOperator(Operator):
     bl_label = "Unload Archives"
     bl_idname = "helldiver2.archive_unloadall"
+    bl_description = "Unloads All Current Loaded Archives"
 
     def execute(self, context):
         Global_TocManager.UnloadArchives()
@@ -2385,6 +2390,7 @@ class BulkLoadOperator(Operator):
 class CreatePatchFromActiveOperator(Operator):
     bl_label = "Create Patch"
     bl_idname = "helldiver2.archive_createpatch"
+    bl_description = "Creates Patch from Current Active Archive"
 
     def execute(self, context):
         Global_TocManager.CreatePatchFromActive()
@@ -2398,6 +2404,7 @@ class CreatePatchFromActiveOperator(Operator):
 class PatchArchiveOperator(Operator):
     bl_label = "Patch Archive"
     bl_idname = "helldiver2.archive_export"
+    bl_description = "Writes Patch to Current Active Patch"
 
     def execute(self, context):
         global Global_TocManager
@@ -2926,6 +2933,7 @@ class LoadArchivesOperator(Operator):
 class SearchArchivesOperator(Operator):
     bl_label = "Search All Archives"
     bl_idname = "helldiver2.search_archives"
+    bl_description = "Searches all Items from current Active Archive"
 
     SearchField : StringProperty(name="SearchField", default="")
     def draw(self, context):
@@ -3038,6 +3046,7 @@ class SetEntryFriendlyNameOperator(Operator):
 class HelpOperator(Operator):
     bl_label  = "Help"
     bl_idname = "helldiver2.help"
+    bl_description = "Opens Tutorial Document"
 
     def execute(self, context):
         url = "https://docs.google.com/document/d/1SF7iEekmxoDdf0EsJu1ww9u2Cr8vzHyn2ycZS7JlWl0"
@@ -3047,6 +3056,7 @@ class HelpOperator(Operator):
 class ArchiveSpreadsheetOperator(Operator):
     bl_label  = "Archive Spreadsheet"
     bl_idname = "helldiver2.archive_spreadsheet"
+    bl_description = "Opens Spreadsheet with Indentified Archives"
 
     def execute(self, context):
         url = "https://docs.google.com/spreadsheets/d/1oQys_OI5DWou4GeRE3mW56j7BIi4M7KftBIPAl1ULFw"
@@ -3184,13 +3194,18 @@ class HellDivers2ToolsPanel(Panel):
 
         # Draw Patch Stuff
         row = layout.row(); row = layout.row()
-        sub = row.row()
-        sub.operator("helldiver2.archive_createpatch", icon= 'COLLECTION_NEW', text="New Patch")
-        sub = row.row()
-        sub.enabled = len(Global_TocManager.Patches) > 0
-        sub.operator("helldiver2.archive_export", icon= 'DISC', text="Write Patch")
-        row = layout.row()
 
+        sub = row.row()
+        archivesLoaded = len(Global_TocManager.LoadedArchives) > 0
+        sub.enabled = archivesLoaded
+        sub.operator("helldiver2.archive_createpatch", icon= 'COLLECTION_NEW', text="New Patch")
+
+        sub = row.row()
+        patchesLoaded = len(Global_TocManager.Patches) > 0
+        sub.enabled = patchesLoaded
+        sub.operator("helldiver2.archive_export", icon= 'DISC', text="Write Patch")
+
+        row = layout.row()
         row.prop(scene.Hd2ToolPanelSettings, "Patches", text="Patches")
         if len(Global_TocManager.Patches) > 0:
             Global_TocManager.SetActivePatchByName(scene.Hd2ToolPanelSettings.Patches)
