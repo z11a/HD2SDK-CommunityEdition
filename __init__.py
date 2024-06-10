@@ -3190,7 +3190,7 @@ class HellDivers2ToolsPanel(Panel):
         row.prop(scene.Hd2ToolPanelSettings, "Patches", text="Patches")
         if len(Global_TocManager.Patches) > 0:
             Global_TocManager.SetActivePatchByName(scene.Hd2ToolPanelSettings.Patches)
-        row.operator("helldiver2.archive_import", icon= 'IMPORT', text="").is_patch = True
+        row.operator("helldiver2.archive_import", icon= 'FILEBROWSER', text="").is_patch = True
 
         # Draw Archive Contents
         row = layout.row()
