@@ -17,9 +17,8 @@ We've taken the time to write a tutorial focused on armor modding which should a
 - [Original Creators Discord](https://discord.gg/ftSZppf)
 - [Community Discord for **Boxed Edition**](https://discord.gg/Nzdc7z8Awr)
 
-# Boxed Edition
 
-## What's New in Boxed Edition?
+## What's Different in Boxed Edition?
 Boxed Edition aims to bring quality of life features to the Helldivers 2 Modding tools. There is much that has been improved with the tools and much that still needs to be. If you have any suggestions please [make an issue](https://github.com/Boxofbiscuits97/io_scene_helldivers2/issues). Here's what we have so far:
 
 ### Features
