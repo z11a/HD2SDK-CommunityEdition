@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 3, 0),
+    "version": (1, 3, 1),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -2532,7 +2532,13 @@ class PatchArchiveOperator(Operator):
         if PatchesNotLoaded(self):
             return{'CANCELLED'}
         
+        for Entry in Global_TocManager.ActivePatch.TocEntries:
+            if not Entry.IsModified:
+                Global_TocManager.Save(int(Entry.FileID), Entry.TypeID)
+                PrettyPrint(f"Saved {int(Entry.FileID)}")
+
         Global_TocManager.PatchActiveArchive()
+        self.report({'INFO'}, f"Patch Written")
         return{'FINISHED'}
 
 #endregion
