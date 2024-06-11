@@ -2362,11 +2362,11 @@ class DefaultLoadArchiveOperator(Operator):
             if area.type == "VIEW_3D": area.tag_redraw()
         
         return{'FINISHED'}
-    
+      
 class LoadArchiveOperator(Operator, ImportHelper):
     bl_label = "Load Archive"
     bl_idname = "helldiver2.archive_import"
-    bl_description = "Imports Archive from Helldivers Data Folder"
+    bl_description = "Manually Load Archive from Helldivers Data Folder"
 
     filter_glob: StringProperty(default='*', options={'HIDDEN'})
     is_patch: BoolProperty(name="is_patch", default=False, options={'HIDDEN'})
@@ -2483,8 +2483,9 @@ class ArchiveEntryOperator(Operator):
         return {'FINISHED'}
 
 class AddEntryToPatchOperator(Operator):
-    bl_label = "Add Entry To Patch"
+    bl_label = "Add To Patch"
     bl_idname = "helldiver2.archive_addtopatch"
+    bl_description = "Adds Entry into Patch"
 
     object_id: StringProperty()
     object_typeid: StringProperty()
@@ -2525,6 +2526,7 @@ class UndoArchiveEntryModOperator(Operator):
 class DuplicateEntryOperator(Operator):
     bl_label = "Duplicate Entry"
     bl_idname = "helldiver2.archive_duplicate"
+    bl_description = "Duplicate Selected Entry"
 
     NewFileID : StringProperty(name="NewFileID", default="")
     def draw(self, context):
@@ -2567,6 +2569,7 @@ class RenamePatchEntryOperator(Operator):
 class DumpArchiveObjectOperator(Operator):
     bl_label = "Dump Archive Object"
     bl_idname = "helldiver2.archive_object_dump_export"
+    bl_description = "Dumps Entry's Contents"
 
     directory: StringProperty(name="Outdir Path",description="dump output dir")
     filter_folder: BoolProperty(default=True,options={"HIDDEN"})
@@ -2596,6 +2599,7 @@ class DumpArchiveObjectOperator(Operator):
 class ImportDumpOperator(Operator, ImportHelper):
     bl_label = "Import Dump"
     bl_idname = "helldiver2.archive_object_dump_import"
+    bl_description = "Loads Raw Dump"
 
     object_id: StringProperty(options={"HIDDEN"})
     object_typeid: StringProperty(options={"HIDDEN"})
@@ -2632,6 +2636,7 @@ class ImportDumpOperator(Operator, ImportHelper):
 class ImportStingrayMeshOperator(Operator):
     bl_label = "Import Archive Mesh"
     bl_idname = "helldiver2.archive_mesh_import"
+    bl_description = "Loads Mesh into Blender Scene"
 
     object_id: StringProperty()
     def execute(self, context):
@@ -2659,6 +2664,7 @@ class ImportStingrayMeshOperator(Operator):
 class SaveStingrayMeshOperator(Operator):
     bl_label  = "Save Mesh"
     bl_idname = "helldiver2.archive_mesh_save"
+    bl_description = "Saves Mesh"
 
     object_id: StringProperty()
     def execute(self, context):
@@ -2670,6 +2676,7 @@ class SaveStingrayMeshOperator(Operator):
 class BatchSaveStingrayMeshOperator(Operator):
     bl_label  = "Save Meshes"
     bl_idname = "helldiver2.archive_mesh_batchsave"
+    bl_description = "Saves Meshes"
 
     def execute(self, context):
         objects = bpy.context.selected_objects
@@ -2701,6 +2708,7 @@ class BatchSaveStingrayMeshOperator(Operator):
 class SaveTextureFromBlendImageOperator(Operator):
     bl_label = "Save Texture"
     bl_idname = "helldiver2.texture_saveblendimage"
+    bl_description = "Saves Texture"
 
     object_id: StringProperty()
     def execute(self, context):
@@ -2721,6 +2729,7 @@ class SaveTextureFromBlendImageOperator(Operator):
 class ImportTextureOperator(Operator):
     bl_label = "Import Texture"
     bl_idname = "helldiver2.texture_import"
+    bl_description = "Loads Texture into Blender Project"
 
     object_id: StringProperty()
     def execute(self, context):
@@ -2733,6 +2742,7 @@ class ImportTextureOperator(Operator):
 class ExportTextureOperator(Operator, ExportHelper):
     bl_label = "Export Texture"
     bl_idname = "helldiver2.texture_export"
+    bl_description = "Export Texture to a Desired File Location"
     filename_ext = ".dds"
 
     object_id: StringProperty(options={"HIDDEN"})
@@ -2785,9 +2795,12 @@ class BatchExportTextureOperator(Operator):
 class SaveTextureFromDDSOperator(Operator, ImportHelper):
     bl_label = "Save Texture"
     bl_idname = "helldiver2.texture_savefromdds"
+    bl_description = "Override Current Texture with a Selected DDS File"
 
     object_id: StringProperty(options={"HIDDEN"})
     def execute(self, context):
+        if PatchesNotLoaded(self):
+            return {'CANCELLED'}
         Entry = Global_TocManager.GetEntry(int(self.object_id), TexID)
         if Entry != None:
             if len(self.filepath) > 1:
@@ -2818,6 +2831,7 @@ class SaveTextureFromDDSOperator(Operator, ImportHelper):
 class SaveMaterialOperator(Operator):
     bl_label = "Save Material"
     bl_idname = "helldiver2.material_save"
+    bl_description = "Saves Material"
 
     object_id: StringProperty()
     def execute(self, context):
@@ -2831,6 +2845,7 @@ class SaveMaterialOperator(Operator):
 class ImportMaterialOperator(Operator):
     bl_label = "Import Material"
     bl_idname = "helldiver2.material_import"
+    bl_description = "Loads Materials into Blender Project"
 
     object_id: StringProperty()
     def execute(self, context):
@@ -2880,6 +2895,7 @@ class AddMaterialOperator(Operator):
 class ShowMaterialEditorOperator(Operator):
     bl_label = "Show Material Editor"
     bl_idname = "helldiver2.material_showeditor"
+    bl_description = "Show List of Textures in Material"
 
     object_id: StringProperty()
     def execute(self, context):
@@ -2923,6 +2939,7 @@ class SetMaterialTexture(Operator, ImportHelper):
 class CopyArchiveEntryOperator(Operator):
     bl_label = "Copy Entry"
     bl_idname = "helldiver2.archive_copy"
+    bl_description = "Copy Selected Entries"
 
     object_id: StringProperty()
     object_typeid: StringProperty()
@@ -2934,6 +2951,7 @@ class CopyArchiveEntryOperator(Operator):
 class PasteArchiveEntryOperator(Operator):
     bl_label = "Paste Entry"
     bl_idname = "helldiver2.archive_paste"
+    bl_description = "Paste Selected Entries"
 
     def execute(self, context):
         Global_TocManager.Paste()
@@ -2942,6 +2960,7 @@ class PasteArchiveEntryOperator(Operator):
 class ClearClipboardOperator(Operator):
     bl_label = "Clear Clipboard"
     bl_idname = "helldiver2.archive_clearclipboard"
+    bl_description = "Clear Selected Entries from Clipboard"
 
     def execute(self, context):
         Global_TocManager.ClearClipboard()
@@ -2950,6 +2969,7 @@ class ClearClipboardOperator(Operator):
 class CopyTextOperator(Operator):
     bl_label  = "Copy ID"
     bl_idname = "helldiver2.copytest"
+    bl_description = "Copies Entry Information"
 
     text: StringProperty()
     def execute(self, context):
@@ -2976,9 +2996,9 @@ class LoadArchivesOperator(Operator):
         return{'FINISHED'}
 
 class SearchArchivesOperator(Operator):
-    bl_label = "Search All Archives"
+    bl_label = "Search Found Archives"
     bl_idname = "helldiver2.search_archives"
-    bl_description = "Searches all Items from current Active Archive"
+    bl_description = "Search from Found Archives"
 
     SearchField : StringProperty(name="SearchField", default="")
     def draw(self, context):
@@ -3043,8 +3063,9 @@ class SearchArchivesOperator(Operator):
         return wm.invoke_props_dialog(self)
 
 class SelectAllOfTypeOperator(Operator):
-    bl_label  = "Select All Of Type"
+    bl_label  = "Select All"
     bl_idname = "helldiver2.select_type"
+    bl_description = "Selects All of Type in Section"
 
     object_typeid: StringProperty()
     def execute(self, context):
@@ -3095,6 +3116,7 @@ class ImportAllOfTypeOperator(Operator):
 class SetEntryFriendlyNameOperator(Operator):
     bl_label = "Set Friendly Name"
     bl_idname = "helldiver2.archive_setfriendlyname"
+    bl_description = "Change Entry Display Name"
 
     NewFriendlyName : StringProperty(name="NewFriendlyName", default="")
     def draw(self, context):
@@ -3269,11 +3291,13 @@ class HellDivers2ToolsPanel(Panel):
         # Draw Archive Import/Export Buttons
         row = layout.row(); row = layout.row()
         row.operator("helldiver2.archive_import_default", icon= 'SOLO_ON', text="")
-        row.operator("helldiver2.archive_import", icon= 'IMPORT').is_patch = False
+        row.operator("helldiver2.archive_import", icon= 'IMPORT', text= "").is_patch = False
+        row.operator("helldiver2.search_archives", icon= 'VIEWZOOM')
+        row.operator("helldiver2.archive_list", icon = 'TEXT')
+        row.prop(scene.Hd2ToolPanelSettings, "ArchiveHashes", text="Hashes")
         row.operator("helldiver2.archive_unloadall", icon= 'FILE_REFRESH', text="")
         row = layout.row()
         row.prop(scene.Hd2ToolPanelSettings, "LoadedArchives", text="Archives")
-        row.operator("helldiver2.search_archives", icon= 'VIEWZOOM', text="")
         row = layout.row()
         if len(Global_TocManager.LoadedArchives) > 0:
             Global_TocManager.SetActiveByName(scene.Hd2ToolPanelSettings.LoadedArchives)
@@ -3493,7 +3517,7 @@ class WM_MT_button_context(Menu):
         elif AreAllTextures:
             row.operator("helldiver2.texture_saveblendimage", icon='FILE_BLEND', text=SaveTextureName).object_id = FileIDStr
             if SingleEntry:
-                row.operator("helldiver2.texture_savefromdds", icon='IMAGE_REFERENCE', text="Save Texture From DDS").object_id = str(Entry.FileID)
+                row.operator("helldiver2.texture_savefromdds", icon='IMAGE_REFERENCE', text="Import DDS").object_id = str(Entry.FileID)
         elif AreAllMaterials:
             row.operator("helldiver2.material_save", icon='FILE_BLEND', text=SaveMaterialName).object_id = FileIDStr
         # Draw copy ID buttons
