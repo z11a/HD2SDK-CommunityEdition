@@ -50,7 +50,7 @@ Global_automatonhashpath = f"{AddonPath}\\hashlists\\archivehashes\\automatonhas
 
 Global_defaultgamepath   = "C:\Program Files (x86)\Steam\steamapps\common\Helldivers 2\data\ "
 Global_defaultgamepath   = Global_defaultgamepath[:len(Global_defaultgamepath) - 1]
-Global_gamepath = ""
+Global_gamepath          = ""
 Global_configpath        = f"{AddonPath}.ini"
 
 Global_CPPHelper = ctypes.cdll.LoadLibrary(Global_dllpath) if os.path.isfile(Global_dllpath) else None
@@ -516,6 +516,12 @@ def GetFriendlyNameFromID(ID):
             if hash_info[1] != "":
                 return hash_info[1]
     return str(ID)
+
+def GetArchiveNameFromID(EntryID):
+    for hash in Global_ArchiveHashes:
+        if hash[0] == EntryID:
+            return hash[1]
+    return EntryID
 
 def HasFriendlyName(ID):
     for hash_info in Global_NameHashes:
@@ -3090,6 +3096,9 @@ class LoadArchivesOperator(Operator):
         global Global_TocManager
         if self.paths_str != "" and os.path.exists(self.paths_str):
             Global_TocManager.LoadArchive(self.paths_str)
+            id = self.paths_str.replace(Global_gamepath, "")
+            name = GetArchiveNameFromID(id) + id[2:]
+            self.report({'INFO'}, f"Loaded {name}")
             return{'FINISHED'}
         else:
             message = "Archive Failed to Load"
@@ -3457,9 +3466,16 @@ class HellDivers2ToolsPanel(Panel):
 
         # Draw Archive Contents
         row = layout.row()
+        title = ""
+        if Global_TocManager.ActiveArchive != None:
+            ArchiveID = Global_TocManager.ActiveArchive.Name
+            title = GetArchiveNameFromID(ArchiveID)
+            if title != Global_TocManager.ActiveArchive.Name:
+                title = title + ArchiveID[2:]
+            else: title = "ArchiveID: " + ArchiveID
         row.prop(scene.Hd2ToolPanelSettings, "ContentsExpanded",
             icon="DOWNARROW_HLT" if scene.Hd2ToolPanelSettings.ContentsExpanded else "RIGHTARROW",
-            icon_only=True, emboss=False, text="Archive Contents")
+            icon_only=True, emboss=False, text=title)
         row.prop(scene.Hd2ToolPanelSettings, "PatchOnly", text="")
 
         # Get Display Data
