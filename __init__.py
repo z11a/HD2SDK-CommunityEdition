@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 Archives: Boxed Edition",
-    "version": (1, 0, 0),
+    "version": (1, 1, 0),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -3140,6 +3140,16 @@ class ArchiveSpreadsheetOperator(Operator):
         webbrowser.open(url, new=0, autoraise=True)
         return{'FINISHED'}
 
+class GithubOperator(Operator):
+    bl_label  = "Github"
+    bl_idname = "helldiver2.github"
+    bl_description = "Opens The Github Page"
+
+    def execute(self, context):
+        url = "https://github.com/Boxofbiscuits97/io_scene_helldivers2"
+        webbrowser.open(url, new=0, autoraise=True)
+        return{'FINISHED'}
+    
 #endregion
 
 #region Menus and Panels
@@ -3234,8 +3244,11 @@ class HellDivers2ToolsPanel(Panel):
         row.prop(scene.Hd2ToolPanelSettings, "MenuExpanded",
             icon="DOWNARROW_HLT" if scene.Hd2ToolPanelSettings.MenuExpanded else "RIGHTARROW",
             icon_only=True, emboss=False, text="Settings")
-        row.operator("helldiver2.help", icon='HELP', text="")
-        row.operator("helldiver2.archive_spreadsheet", icon='INFO', text="")
+        row = layout.row()
+        row.operator("helldiver2.help", icon='HELP', text="Documentation")
+        row.operator("helldiver2.archive_spreadsheet", icon='INFO', text="Archive IDs")
+        row.operator("helldiver2.github", icon='URL', text= "")
+        
         if scene.Hd2ToolPanelSettings.MenuExpanded:
             row = layout.row(); row.separator(); row.label(text="Display Types"); box = row.box(); row = box.grid_flow(columns=1)
             row.prop(scene.Hd2ToolPanelSettings, "ShowMeshes")
@@ -3554,6 +3567,7 @@ classes = (
     BulkLoadOperator,
     ImportAllOfTypeOperator,
     UnloadPatchesOperator,
+    GithubOperator,
 )
 
 Global_TocManager = TocManager()
