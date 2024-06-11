@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 1, 1),
+    "version": (1, 2, 1),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -2423,7 +2423,7 @@ def PatchesNotLoaded(self):
 class ChangeFilepathOperator(Operator, ImportHelper):
     bl_label = "Change Filepath"
     bl_idname = "helldiver2.change_filepath"
-    filename_ext = "."
+    #filename_ext = "."
     use_filter_folder = True
 
     def __init__(self):
@@ -2431,6 +2431,8 @@ class ChangeFilepathOperator(Operator, ImportHelper):
         self.filepath = bpy.path.abspath(Global_gamepath)
         
     def execute(self, context):
+        global Global_gamepath
+        Global_gamepath = self.filepath
         UpdateConfig(Global_gamepath)
         PrettyPrint(f"Changed Game File Path: {Global_gamepath}")
         return{'FINISHED'}
