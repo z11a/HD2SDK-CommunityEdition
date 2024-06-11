@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 2, 5),
+    "version": (1, 3, 0),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -3731,6 +3731,7 @@ Global_TocManager = TocManager()
 
 def register():
     if Global_CPPHelper == None: raise Exception("HDTool_Helper is required by the addon but failed to load!")
+    if not os.path.exists(Global_texconvpath): raise Exception("Texconv is not found, please install Texconv in /deps/")
     InitializeConfig()
     LoadNormalPalette(Global_palettepath)
     LoadTypeHashes()
