@@ -17,6 +17,7 @@ Boxed Edition aims to bring quality of life features to the Helldivers 2 Modding
 - **Bulk Scene Importing** for all items in a section
 - **Itegrated List** with in game names to load Archive IDs
 - **Better Patch Organization** with naming patches and saving WIP patches 
+- **Better Friendly Names** for ability to automatically be generated and to be removed
 
 ### What About the Original Tool?
 The developers of the original version of the tool have stated that they are unlikely to update it. Therefore, this community version of it has been made to bring quality of life features and to fix issues with the base version of the tool.
@@ -41,5 +42,6 @@ We've taken the time to write a tutorial focused on armor modding which should a
 
 
 ## Credits
+- Toasted modding team for making the [original version](https://github.com/kboykboy2/io_scene_helldivers2)
 - Boxofbiscuits97 for making this community version
 - Khameli0n for being the lovely host of the discord and helping with the community version
