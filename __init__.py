@@ -56,6 +56,7 @@ TextureTypeLookup = {
     "original": ("pbr: ", "", "", "", "", "normal: ", "", "sss color: ", "", "color: ", "", "", ""),
     "basic": ("pbr: ", "color: ", "normal: "),
     "emissive": ("normal/ao/cavity: ", "emission: ", "color/metallic: ")
+    "original": (
 }
 
 #endregion
