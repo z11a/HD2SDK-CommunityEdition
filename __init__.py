@@ -910,8 +910,8 @@ class TocManager():
 
     def BulkLoad(self):
         self.UnloadArchives()
-        archivesList = ["8313c9a556b8ee85"]
-        batchLoadArchive(archivesList, True)
+        archivesList = "8313c9a556b8ee85"
+        Global_TocManager.LoadArchive(archivesList)
 
     def SetActive(self, Archive):
         if Archive != self.ActiveArchive:
@@ -3637,57 +3637,3 @@ def unregister():
 
 if __name__=="__main__":
     register()
-
-
-
-
-def batchLoadArchive(list, loadMeshes):
-    for item in list:
-        basePath = "C:/Program Files (x86)/Steam/steamapps/common/Helldivers 2/data/"
-        path = basePath + item
-
-        meshes = []
-        textures = []
-        testArch = Global_TocManager.LoadArchive(str(path), True, False)
-        if(loadMeshes):
-            for element in testArch.TocEntries:
-                if element.TypeID == 1792059921637536489 or element.TypeID == 16187218042980615487:
-                    meshes.append(element)
-                if element.TypeID == 14790446551990181426:
-                    textures.append(element)
-                
-
-            for meshElement in meshes:
-                print(meshElement.FileID)
-                loadMeshes(meshElement.FileID)
-
-        #screenshot loaded stuff
-        #time.sleep(1)
-        #path = "C:/Users/Roboc/Downloads/FileDivers/" + item + ".png"
-        #pyautogui.screenshot(path)
-
-
-    # Redraw
-    #for area in context.screen.areas:
-    #    if area.type == "VIEW_3D": area.tag_redraw()
-
-def loadMeshes(id):
-    EntriesIDs = IDsFromString(str(id))
-    Errors = []
-    for EntryID in EntriesIDs:
-        if len(EntriesIDs) == 1:
-            Global_TocManager.Load(EntryID, 16187218042980615487)
-        else:
-            try:
-                Global_TocManager.Load(EntryID, 16187218042980615487)
-            except Exception as error:
-                Errors.append([EntryID, error])
-
-    if len(Errors) > 0:
-        PrettyPrint("\nThese errors occurred while attempting to load meshes...", "error")
-        idx = 0
-        for error in Errors:
-            PrettyPrint(f"  Error {idx}: for mesh {error[0]}", "error")
-            PrettyPrint(f"    {error[1]}\n", "error")
-            idx += 1
-        raise Exception("One or more meshes failed to load")
