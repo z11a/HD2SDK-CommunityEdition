@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 2, 1),
+    "version": (1, 2, 5),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -3246,6 +3246,63 @@ class GithubOperator(Operator):
     
 #endregion
 
+#region Operators: Context Menu
+
+stored_custom_properties = {}
+class OBJECT_OT_copy_custom_properties(bpy.types.Operator):
+    bl_label = "Copy HD2 Properties"
+    bl_idname = "object.copy_custom_properties"
+    bl_description = "Copies Custom Property Data for Helldivers 2 Objects"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        global stored_custom_properties
+        obj = context.active_object
+
+        if obj is None:
+            self.report({'WARNING'}, "No active object selected")
+            return {'CANCELLED'}
+
+        stored_custom_properties.clear()
+        for key, value in obj.items():
+            if key not in obj.bl_rna.properties:  # Skip built-in properties
+                stored_custom_properties[key] = value
+
+        self.report({'INFO'}, f"Copied {len(stored_custom_properties)} custom properties")
+        return {'FINISHED'}
+
+class OBJECT_OT_paste_custom_properties(bpy.types.Operator):
+    bl_label = "Paste HD2 Properties"
+    bl_idname = "object.paste_custom_properties"
+    bl_description = "Pastes Custom Property Data for Helldivers 2 Objects"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        global stored_custom_properties
+        obj = context.active_object
+
+        if obj is None:
+            self.report({'WARNING'}, "No active object selected")
+            return {'CANCELLED'}
+
+        if not stored_custom_properties:
+            self.report({'WARNING'}, "No custom properties to paste")
+            return {'CANCELLED'}
+
+        for key, value in stored_custom_properties.items():
+            obj[key] = value
+
+        self.report({'INFO'}, f"Pasted {len(stored_custom_properties)} custom properties")
+        return {'FINISHED'}
+    
+def CustomPropertyContext(self, context):
+    layout = self.layout
+    layout.separator()
+    layout.operator("object.copy_custom_properties", icon= 'COPYDOWN')
+    layout.operator("object.paste_custom_properties", icon= 'PASTEDOWN')
+
+#endregion
+
 #region Menus and Panels
 
 def LoadedArchives_callback(scene, context):
@@ -3666,6 +3723,8 @@ classes = (
     UnloadPatchesOperator,
     GithubOperator,
     ChangeFilepathOperator,
+    OBJECT_OT_paste_custom_properties,
+    OBJECT_OT_copy_custom_properties,
 )
 
 Global_TocManager = TocManager()
@@ -3681,12 +3740,15 @@ def register():
         bpy.utils.register_class(cls)
     Scene.Hd2ToolPanelSettings = PointerProperty(type=Hd2ToolPanelSettings)
     bpy.utils.register_class(WM_MT_button_context)
+    bpy.types.VIEW3D_MT_object_context_menu.append(CustomPropertyContext)
 
 def unregister():
     bpy.utils.unregister_class(WM_MT_button_context)
     del Scene.Hd2ToolPanelSettings
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
+    bpy.types.VIEW3D_MT_object_context_menu.remove(CustomPropertyContext)
+
 
 if __name__=="__main__":
     register()
