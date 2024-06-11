@@ -48,7 +48,8 @@ Global_capehashpath      = f"{AddonPath}\\hashlists\\archivehashes\\capehash.txt
 Global_terminidhashpath  = f"{AddonPath}\\hashlists\\archivehashes\\terminidhash.txt"
 Global_automatonhashpath = f"{AddonPath}\\hashlists\\archivehashes\\automatonhash.txt"
 
-Global_defaultgamepath   = "C:\Program Files (x86)\Steam\steamapps\common\Helldivers 2\data"
+Global_defaultgamepath   = "C:\Program Files (x86)\Steam\steamapps\common\Helldivers 2\data\ "
+Global_defaultgamepath   = Global_defaultgamepath[:len(Global_defaultgamepath) - 1]
 Global_gamepath = ""
 Global_configpath        = f"{AddonPath}.ini"
 
@@ -627,6 +628,8 @@ def InitializeConfig():
         UpdateConfig(Global_defaultgamepath)
 
 def UpdateConfig(newpath):
+    global Global_gamepath
+    Global_gamepath = newpath
     config = configparser.ConfigParser()
     config['DEFAULT'] = {'filepath' : newpath}
     with open(Global_configpath, 'w') as configfile:
@@ -2428,8 +2431,6 @@ class ChangeFilepathOperator(Operator, ImportHelper):
         self.filepath = bpy.path.abspath(Global_gamepath)
         
     def execute(self, context):
-        global Global_gamepath
-        Global_gamepath = self.filepath
         UpdateConfig(Global_gamepath)
         PrettyPrint(f"Changed Game File Path: {Global_gamepath}")
         return{'FINISHED'}
