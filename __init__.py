@@ -2771,6 +2771,7 @@ class ExportTextureOperator(Operator, ExportHelper):
 class BatchExportTextureOperator(Operator):
     bl_label = "Export Textures"
     bl_idname = "helldiver2.texture_batchexport"
+    bl_description = "Export Textures to a Desired File Location"
     filename_ext = ".dds"
 
     directory: StringProperty(name="Outdir Path",description="dds output dir")
