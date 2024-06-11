@@ -13,6 +13,7 @@ import random as r
 from copy import deepcopy
 from math import ceil
 from pathlib import Path
+import configparser
 
 #import pyautogui 
 
@@ -47,7 +48,9 @@ Global_capehashpath      = f"{AddonPath}\\hashlists\\archivehashes\\capehash.txt
 Global_terminidhashpath  = f"{AddonPath}\\hashlists\\archivehashes\\terminidhash.txt"
 Global_automatonhashpath = f"{AddonPath}\\hashlists\\archivehashes\\automatonhash.txt"
 
-Global_gamepath          = "C:/Program Files (x86)/Steam/steamapps/common/Helldivers 2/data/"
+Global_defaultgamepath   = "C:\Program Files (x86)\Steam\steamapps\common\Helldivers 2\data"
+Global_gamepath = ""
+Global_configpath        = f"{AddonPath}.ini"
 
 Global_CPPHelper = ctypes.cdll.LoadLibrary(Global_dllpath) if os.path.isfile(Global_dllpath) else None
 
@@ -104,7 +107,7 @@ def PrettyPrint(msg, type="info"): # Inspired by FortnitePorting
             color = u"\u001b[33m"
         case _:
             pass
-    print(f"{color}[HD2TOOL]{reset} {msg}")
+    print(f"{color}[HD2SDK:CE]{reset} {msg}")
 
 def DXGI_FORMAT(format):
     Dict = {0: "UNKNOWN", 1: "R32G32B32A32_TYPELESS", 2: "R32G32B32A32_FLOAT", 3: "R32G32B32A32_UINT", 4: "R32G32B32A32_SINT", 5: "R32G32B32_TYPELESS", 6: "R32G32B32_FLOAT", 7: "R32G32B32_UINT", 8: "R32G32B32_SINT", 9: "R16G16B16A16_TYPELESS", 10: "R16G16B16A16_FLOAT", 11: "R16G16B16A16_UNORM", 12: "R16G16B16A16_UINT", 13: "R16G16B16A16_SNORM", 14: "R16G16B16A16_SINT", 15: "R32G32_TYPELESS", 16: "R32G32_FLOAT", 17: "R32G32_UINT", 18: "R32G32_SINT", 19: "R32G8X24_TYPELESS", 20: "D32_FLOAT_S8X24_UINT", 21: "R32_FLOAT_X8X24_TYPELESS", 22: "X32_TYPELESS_G8X24_UINT", 23: "R10G10B10A2_TYPELESS", 24: "R10G10B10A2_UNORM", 25: "R10G10B10A2_UINT", 26: "R11G11B10_FLOAT", 27: "R8G8B8A8_TYPELESS", 28: "R8G8B8A8_UNORM", 29: "R8G8B8A8_UNORM_SRGB", 30: "R8G8B8A8_UINT", 31: "R8G8B8A8_SNORM", 32: "R8G8B8A8_SINT", 33: "R16G16_TYPELESS", 34: "R16G16_FLOAT", 35: "R16G16_UNORM", 36: "R16G16_UINT", 37: "R16G16_SNORM", 38: "R16G16_SINT", 39: "R32_TYPELESS", 40: "D32_FLOAT", 41: "R32_FLOAT", 42: "R32_UINT", 43: "R32_SINT", 44: "R24G8_TYPELESS", 45: "D24_UNORM_S8_UINT", 46: "R24_UNORM_X8_TYPELESS", 47: "X24_TYPELESS_G8_UINT", 48: "R8G8_TYPELESS", 49: "R8G8_UNORM", 50: "R8G8_UINT", 51: "R8G8_SNORM", 52: "R8G8_SINT", 53: "R16_TYPELESS", 54: "R16_FLOAT", 55: "D16_UNORM", 56: "R16_UNORM", 57: "R16_UINT", 58: "R16_SNORM", 59: "R16_SINT", 60: "R8_TYPELESS", 61: "R8_UNORM", 62: "R8_UINT", 63: "R8_SNORM", 64: "R8_SINT", 65: "A8_UNORM", 66: "R1_UNORM", 67: "R9G9B9E5_SHAREDEXP", 68: "R8G8_B8G8_UNORM", 69: "G8R8_G8B8_UNORM", 70: "BC1_TYPELESS", 71: "BC1_UNORM", 72: "BC1_UNORM_SRGB", 73: "BC2_TYPELESS", 74: "BC2_UNORM", 75: "BC2_UNORM_SRGB", 76: "BC3_TYPELESS", 77: "BC3_UNORM", 78: "BC3_UNORM_SRGB", 79: "BC4_TYPELESS", 80: "BC4_UNORM", 81: "BC4_SNORM", 82: "BC5_TYPELESS", 83: "BC5_UNORM", 84: "BC5_SNORM", 85: "B5G6R5_UNORM", 86: "B5G5R5A1_UNORM", 87: "B8G8R8A8_UNORM", 88: "B8G8R8X8_UNORM", 89: "R10G10B10_XR_BIAS_A2_UNORM", 90: "B8G8R8A8_TYPELESS", 91: "B8G8R8A8_UNORM_SRGB", 92: "B8G8R8X8_TYPELESS", 93: "B8G8R8X8_UNORM_SRGB", 94: "BC6H_TYPELESS", 95: "BC6H_UF16", 96: "BC6H_SF16", 97: "BC7_TYPELESS", 98: "BC7_UNORM", 99: "BC7_UNORM_SRGB", 100: "AYUV", 101: "Y410", 102: "Y416", 103: "NV12", 104: "P010", 105: "P016", 106: "420_OPAQUE", 107: "YUY2", 108: "Y210", 109: "Y216", 110: "NV11", 111: "AI44", 112: "IA44", 113: "P8", 114: "A8P8", 115: "B4G4R4A4_UNORM", 130: "P208", 131: "V208", 132: "V408"}
@@ -608,6 +611,27 @@ def LoadArchiveHashes():
     LoadHash(Global_terminidhashpath, "Terminid: ")
     LoadHash(Global_automatonhashpath, "Automaton: ")
 
+#endregion
+
+# region Configuration
+
+def InitializeConfig():
+    if os.path.exists(Global_configpath):
+        global Global_gamepath
+        config = configparser.ConfigParser()
+        config.read(Global_configpath, encoding='utf-8')
+        Global_gamepath = config['DEFAULT']['filepath']
+        PrettyPrint(f"Loaded data folder path at: {Global_gamepath}")
+
+    else:
+        UpdateConfig(Global_defaultgamepath)
+
+def UpdateConfig(newpath):
+    config = configparser.ConfigParser()
+    config['DEFAULT'] = {'filepath' : newpath}
+    with open(Global_configpath, 'w') as configfile:
+        config.write(configfile)
+    
 #endregion
 
 #region Classes and Functions: Stingray Archives
@@ -2392,6 +2416,24 @@ def PatchesNotLoaded(self):
         return False
 
 #region Operators: Archives & Patches
+
+class ChangeFilepathOperator(Operator, ImportHelper):
+    bl_label = "Change Filepath"
+    bl_idname = "helldiver2.change_filepath"
+    filename_ext = "."
+    use_filter_folder = True
+
+    def __init__(self):
+        global Global_gamepath
+        self.filepath = bpy.path.abspath(Global_gamepath)
+        
+    def execute(self, context):
+        global Global_gamepath
+        Global_gamepath = self.filepath
+        UpdateConfig(Global_gamepath)
+        PrettyPrint(f"Changed Game File Path: {Global_gamepath}")
+        return{'FINISHED'}
+
 class DefaultLoadArchiveOperator(Operator):
     bl_label = "Default Archive"
     bl_description = "Loads the Default Archive that Patches should be built upon"
@@ -2399,7 +2441,10 @@ class DefaultLoadArchiveOperator(Operator):
 
     def execute(self, context):
         path = Global_gamepath + "9ba626afa44a3aa3"
-        Global_TocManager.LoadArchive(path)
+        if not os.path.exists(path):
+            self.report({'ERROR'}, "Current Filepath is Invalid. Change This in Settings")
+            return{'CANCELLED'}
+        Global_TocManager.LoadArchive(path, True, False)
 
         # Redraw
         for area in context.screen.areas:
@@ -3038,7 +3083,10 @@ class LoadArchivesOperator(Operator):
             Global_TocManager.LoadArchive(self.paths_str)
             return{'FINISHED'}
         else:
-            self.report({'ERROR'}, "Invalid File Path for Archive" + str(os.path.exists(self.paths_str)))
+            message = "Archive Failed to Load"
+            if not os.path.exists(self.paths_str):
+                message = "Current Filepath is Invalid. Change This in Settings"
+            self.report({'ERROR'}, message )
             return{'CANCELLED'}
 
 class SearchArchivesOperator(Operator):
@@ -3308,6 +3356,9 @@ class HellDivers2ToolsPanel(Panel):
             row.prop(scene.Hd2ToolPanelSettings, "Force2UVs")
             row.prop(scene.Hd2ToolPanelSettings, "Force1Group")
             row.prop(scene.Hd2ToolPanelSettings, "AutoLods")
+            row = layout.row()
+            row.label(text=Global_gamepath)
+            row.operator("helldiver2.change_filepath", icon='FILEBROWSER')
 
         # Draw Archive Import/Export Buttons
         row = layout.row(); row = layout.row()
@@ -3611,12 +3662,14 @@ classes = (
     ImportAllOfTypeOperator,
     UnloadPatchesOperator,
     GithubOperator,
+    ChangeFilepathOperator,
 )
 
 Global_TocManager = TocManager()
 
 def register():
     if Global_CPPHelper == None: raise Exception("HDTool_Helper is required by the addon but failed to load!")
+    InitializeConfig()
     LoadNormalPalette(Global_palettepath)
     LoadTypeHashes()
     LoadNameHashes()
