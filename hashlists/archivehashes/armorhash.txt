@@ -1,0 +1,24 @@
+4ceb3d4e31097c68 B-01 Tactical
+519cc1ec2eb56e1d B-01 Tactical
+562a45e9bc984eb9 B-01 Tactical
+58e4bd4b2278d15c B-01 Tactical
+2d25ef67b7d87ea3 CM-09 Bonesnapper
+31d06451a09679f1 FS-05 Marksman
+8670598c1f4462dc FS-05 Marksman
+ccac0a57aca3ae92 FS-05 Marksman
+d7e0e8a6c8ab0e2c FS-05 Marksman
+9102938b4b2aef9d FS-23 Battle Master
+0bb13de574d4acce SC-34 Infiltrator
+5e0dba19a567fb99 DP-53 Saviour of the Free
+6cd3d55c05d4eac1 B-01 Tactical
+88ccc33c4cca4d20 CE-81 Juggernaut
+e54eaa26d836a2bf SC-30 Trailblazer Scout
+b0db7f4f0a11debd CM-14 Physician
+824aa91040dadba8 B-27 Fortified Commando
+558b259b94d2d1c2 FS-34 Exterminator
+ffcad1f7ff9888d7 CE-07 Demolition Specialist
+5def9553433fceda SA-04 Combat Technician
+1de000bcfe445daf SA-12 Servo Assisted
+d1421b2988398f0a TBDSA-32 Dynamo
+aade1a73a16b5fb5 SA-25 Steel Trooper
+dfa7c28c3b490a8c B-08 Light Gunner

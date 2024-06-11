@@ -1,0 +1,26 @@
+a96722adb4b2c43a Berserker
+eada82fbe2b1a689 Commissar
+1ff5cb1fc2fe055b Devastator
+3cf45796343b36df Devastator
+eaa001bca299717e Devastator
+a2a2eb28bc511575 Factory Strider
+27cb3df21f6599fd Gun Ship
+086e54bc88865de2 Hulk
+499591b12328acbd Hulk
+eda39e568ad5f302 Hulk
+094394c2a2c22f36 Scout Strider
+063a5b895ed482e6 Tank
+1a3dc966179bd5a4 Tank
+62ec9c912c88c15d Tank
+079529fe7dd7c0cb Trooper
+387a99b22d643bb1 Trooper
+69c66efe95decaf0 Trooper
+769ee339c8ca621b Trooper
+77b1dfa352e8cbed Trooper
+7a8ede61a5d379fd Trooper
+88e51fafbe068536 Commissar
+9dedbfc1b397d535 Trooper
+b7aedfc7bff6956c Trooper
+bb2633ec2b4e2f86 Trooper
+c5f8c8cd5e25dcb1 Trooper
+f042cba420e65b59 Trooper

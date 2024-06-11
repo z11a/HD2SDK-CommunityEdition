@@ -1,0 +1,19 @@
+855b36a0321f7106 Bile Spewer
+93e4bd568ccd515d Bile Spitter
+fac59cae01035deb Bile Titan
+647308cc007f32ae Brood Commander
+7f22b24a87dda46d Brood Commander
+ea2b289bb6c14cfe Charger
+578fd2bcda91ee2f Charger Bull
+90aeefeb7184560c Hive Guard
+6771d08d041deaf3 Hunter
+214f30944d4c4cd7 Nursing Spewer
+7a088b8e45e12ed6 Pouncer
+4738d3010ed84415 Scavenger
+e341318c4cdadcf0 Scavenger
+58cc04e08a03076c Shrieker
+c7c05edbb2fe0b77 Bile Spewer
+c082febf2a0d29e6 Stalker
+3c5227a93c2382a1 Warrior
+94d5c96412fdbbdb Warrior
+cdc32c2d1b60aa9e Warrior

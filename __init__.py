@@ -41,6 +41,14 @@ Global_typehashpath      = f"{AddonPath}\\hashlists\\typehash.txt"
 Global_filehashpath      = f"{AddonPath}\\hashlists\\filehash.txt"
 Global_friendlynamespath = f"{AddonPath}\\hashlists\\friendlynames.txt"
 
+Global_armorhashpath     = f"{AddonPath}\\hashlists\\archivehashes\\armorhash.txt"
+Global_helmethashpath    = f"{AddonPath}\\hashlists\\archivehashes\\helmethash.txt"
+Global_capehashpath      = f"{AddonPath}\\hashlists\\archivehashes\\capehash.txt"
+Global_terminidhashpath  = f"{AddonPath}\\hashlists\\archivehashes\\terminidhash.txt"
+Global_automatonhashpath = f"{AddonPath}\\hashlists\\archivehashes\\automatonhash.txt"
+
+Global_gamepath          = "C:/Program Files (x86)/Steam/steamapps/common/Helldivers 2/data/"
+
 Global_CPPHelper = ctypes.cdll.LoadLibrary(Global_dllpath) if os.path.isfile(Global_dllpath) else None
 
 #endregion
@@ -585,6 +593,20 @@ def LoadNameHashes():
             if int(parts[0]) not in Loaded:
                 Global_NameHashes.append([int(parts[0]), parts[1].replace("\n", "")])
                 Loaded.append(int(parts[0]))
+
+Global_ArchiveHashes = []
+def LoadHash(path, title):
+    with open(path, 'r') as f:
+        for line in f.readlines():
+            parts = line.split(" ", 1)
+            Global_ArchiveHashes.append([parts[0], title + parts[1].replace("\n", "") + " #" + str(parts[0])[:2]])
+                
+def LoadArchiveHashes():
+    LoadHash(Global_armorhashpath, "Armor: ")
+    LoadHash(Global_helmethashpath, "Helmet: ")
+    LoadHash(Global_capehashpath, "Cape: ")
+    LoadHash(Global_terminidhashpath, "Terminid: ")
+    LoadHash(Global_automatonhashpath, "Automaton: ")
 
 #endregion
 
@@ -2376,8 +2398,8 @@ class DefaultLoadArchiveOperator(Operator):
     bl_idname = "helldiver2.archive_import_default"
 
     def execute(self, context):
-        item = ["9ba626afa44a3aa3"]
-        batchLoadArchive(item, False)
+        path = Global_gamepath + "9ba626afa44a3aa3"
+        Global_TocManager.LoadArchive(path)
 
         # Redraw
         for area in context.screen.areas:
@@ -2394,7 +2416,7 @@ class LoadArchiveOperator(Operator, ImportHelper):
     is_patch: BoolProperty(name="is_patch", default=False, options={'HIDDEN'})
 
     def __init__(self):
-        self.filepath = bpy.path.abspath("C:/Program Files (x86)/Steam/steamapps/common/Helldivers 2/data/")
+        self.filepath = bpy.path.abspath(Global_gamepath)
 
     def execute(self, context):
         # Sanitize path by removing any provided extension, so the correct TOC file is loaded
@@ -3007,16 +3029,18 @@ class CopyTextOperator(Operator):
 class LoadArchivesOperator(Operator):
     bl_label = "Load Archives"
     bl_idname = "helldiver2.archives_import"
+    bl_description = "Loads Selected Archive"
 
     paths_str: StringProperty(name="paths_str")
     def execute(self, context):
         global Global_TocManager
-        paths = self.paths_str.split(',')
-        for path in paths:
-            if path != "" and os.path.exists(path):
-                Global_TocManager.LoadArchive(path)
-        self.paths = []
-        return{'FINISHED'}
+        if self.paths_str != "" and os.path.exists(self.paths_str):
+            Global_TocManager.LoadArchive(self.paths_str)
+            context.window_manager.windows[0].close()
+            return{'FINISHED'}
+        else:
+            self.report({'ERROR'}, "Invalid File Path for Archive" + str(os.path.exists(self.paths_str)))
+            return{'CANCELLED'}
 
 class SearchArchivesOperator(Operator):
     bl_label = "Search Found Archives"
@@ -3033,48 +3057,23 @@ class SearchArchivesOperator(Operator):
             self.PrevSearch = self.SearchField
 
             self.ArchivesToDisplay = []
-            friendlysearches = []
-            for hash_info in Global_NameHashes:
-                Found = True
-                for search in self.SearchField.split(" "):
-                    if not (hash_info[1].find(search) != -1 and str(hash_info[0]) not in friendlysearches):
-                        Found = False
-                if Found:
-                    friendlysearches.append(str(hash_info[0]))
+            for Entry in Global_ArchiveHashes:
+                if Entry[1].lower().find(self.SearchField.lower()) != -1:
+                    self.ArchivesToDisplay.append([Entry[0], Entry[1]])
+    
+        if self.SearchField != "" and len(self.ArchivesToDisplay) == 0:
+            row = layout.row(); row.label(text="No Archive IDs Found")
+            row = layout.row(); row.label(text="Know an ID that's Not Here?")
+            row = layout.row(); row.label(text="Make an issue on the github.")
+            row = layout.row(); row.label(text="Archive ID and In Game Name")
+            row = layout.row(); row.operator("helldiver2.github", icon= 'URL')
 
-            for Archive in Global_TocManager.SearchArchives:
-                NumMatches = 0
-                for Entry in Archive.TocEntries:
-                    Found = True
-                    for search in self.SearchField.split(" "):
-                        if not (str(Entry.FileID).find(search) != -1):
-                            Found = False
-                    if Found:
-                        NumMatches += 1
-
-                    if not Found:
-                        for friendlysearch in friendlysearches:
-                            if str(Entry.FileID).find(friendlysearch) != -1:
-                                NumMatches += 1
-                if NumMatches > 0 and [Archive, Archive.Name+": "+str(NumMatches)] not in self.ArchivesToDisplay:
-                    self.ArchivesToDisplay.append([Archive, Archive.Name+": "+str(NumMatches)])
-
-        # Draw Open All Archives Button
-        if len(self.ArchivesToDisplay) > 50:
-            row = layout.row()
-            row.label(text="Too many archives to load all")
         else:
-            paths_str = ""
             for Archive in self.ArchivesToDisplay:
-                paths_str += Archive[0].Path + ","
+                row = layout.row()
+                row.label(text=Archive[1], icon='FILE_ARCHIVE')
+                row.operator("helldiver2.archives_import", icon= 'FILE_NEW', text="").paths_str = Global_gamepath + str(Archive[0])
 
-            row = layout.row()
-            row.operator("helldiver2.archives_import", icon= 'FILE_NEW').paths_str = paths_str
-        # Draw Display Archives
-        for Archive in self.ArchivesToDisplay:
-            row = layout.row()
-            row.label(text=Archive[1], icon='FILE_ARCHIVE')
-            row.operator("helldiver2.archives_import", icon= 'FILE_NEW', text="").paths_str = Archive[0].Path
     def execute(self, context):
         return {'FINISHED'}
 
@@ -3316,8 +3315,6 @@ class HellDivers2ToolsPanel(Panel):
         row.operator("helldiver2.archive_import_default", icon= 'SOLO_ON', text="")
         row.operator("helldiver2.archive_import", icon= 'IMPORT', text= "").is_patch = False
         row.operator("helldiver2.search_archives", icon= 'VIEWZOOM')
-        row.operator("helldiver2.archive_list", icon = 'TEXT')
-        row.prop(scene.Hd2ToolPanelSettings, "ArchiveHashes", text="Hashes")
         row.operator("helldiver2.archive_unloadall", icon= 'FILE_REFRESH', text="")
         row = layout.row()
         row.prop(scene.Hd2ToolPanelSettings, "LoadedArchives", text="Archives")
@@ -3624,6 +3621,7 @@ def register():
     LoadNormalPalette(Global_palettepath)
     LoadTypeHashes()
     LoadNameHashes()
+    LoadArchiveHashes()
     for cls in classes:
         bpy.utils.register_class(cls)
     Scene.Hd2ToolPanelSettings = PointerProperty(type=Hd2ToolPanelSettings)

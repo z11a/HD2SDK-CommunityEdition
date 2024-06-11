@@ -9,13 +9,13 @@ A Blender addon facilitating the modding of textures, meshes and materials conta
 Boxed Edition aims to bring quality of life features to the Helldivers 2 Modding tools. There is much that has been improved with the tools and much that still needs to be. If you have any suggestions please [make an issue](https://github.com/Boxofbiscuits97/io_scene_helldivers2/issues). Here's what we have so far:
 
 ### Features
+- **Listed Found Archives** so you don't manually have to select and load Archives by their IDs
 - **Descriptions** for all actions in the tool
 - **Default Archive Button** for the one that patches should be made from
 - **Better Error Handling** for more detailed error messages for when things go wrong
 
 ### Planned
 - **Bulk Scene Importing** for all items in a section
-- **Itegrated List** with in game names to load Archive IDs
 - **Better Patch Organization** with naming patches and saving WIP patches 
 - **Better Friendly Names** for ability to automatically be generated and to be removed
 

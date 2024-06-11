@@ -1,0 +1,22 @@
+fd109bfeeed36726 B-01 Tactical
+5828025300024f4f CM-09 Bonesnapper
+453c6def93940335 FS-05 Marksman
+98da89d0d5132867 FS-23 Battle Master
+984f49b3c0542aa3 SC-34 Infiltrator
+3b143cc283b7f707 B-01 Tactical
+8230afe78d703e38 CE-81 Juggernaut
+8313c9a556b8ee85 B-01 Tactical
+9d538582c1cd96b8 DP-40/TR-9
+b72f72e3863c1611 CE-35 Trench Engineer
+e08b7a38aa847b58 SC-30 Trailblazer Scout
+f4880623d32bafa9 B-01 Tactical
+fd1028aaaa651c2f SA-25 Steel Trooper
+40cecc6f5af56654 FS-34 Exterminator
+7805dbf6f83b09ba B-08 Light Gunner
+18e40c54da8c54bf EX-03 Prototype 3
+7f49d834a7764207 SA-04 Combat Technician
+e4e4639f4365ca4e SA-32 Dynamo
+e9f7da425997f38b CW-22 Kodiak
+0290d8011fce62ef FS-38 Eradicator
+5e9a360985f0a6e0 TR-117 Alpha Commander
+7c3496a468bf0028 CM-14 Physician
