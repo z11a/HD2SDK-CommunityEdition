@@ -1,6 +1,6 @@
 bl_info = {
-    "name": "Helldivers 2 Archives: Boxed Edition",
-    "version": (1, 1, 0),
+    "name": "Helldivers 2 SDK: Community Edition",
+    "version": (1, 1, 1),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -3036,7 +3036,6 @@ class LoadArchivesOperator(Operator):
         global Global_TocManager
         if self.paths_str != "" and os.path.exists(self.paths_str):
             Global_TocManager.LoadArchive(self.paths_str)
-            context.window_manager.windows[0].close()
             return{'FINISHED'}
         else:
             self.report({'ERROR'}, "Invalid File Path for Archive" + str(os.path.exists(self.paths_str)))
@@ -3190,7 +3189,7 @@ class GithubOperator(Operator):
     bl_description = "Opens The Github Page"
 
     def execute(self, context):
-        url = "https://github.com/Boxofbiscuits97/io_scene_helldivers2"
+        url = "https://github.com/Boxofbiscuits97/HD2SDK-CommunityEdition"
         webbrowser.open(url, new=0, autoraise=True)
         return{'FINISHED'}
     
@@ -3229,7 +3228,7 @@ class Hd2ToolPanelSettings(PropertyGroup):
     SearchField : StringProperty(default = "")
 
 class HellDivers2ToolsPanel(Panel):
-    bl_label = f"Helldivers 2 Archives: Boxed Edition v{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}"
+    bl_label = f"Helldivers 2 SDK: Community Edition v{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}"
     bl_idname = "SF_PT_Tools"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"

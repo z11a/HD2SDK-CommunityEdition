@@ -1,12 +1,12 @@
-# Helldivers 2 Archive: Boxed Edition
+# Helldivers 2 SDK: Community Edition
 A Blender addon facilitating the modding of textures, meshes and materials contained within Helldivers 2 archives.
 
 ## DISCLAIMER
 > [!CAUTION]
 > Helldivers 2 is a multiplayer game with anti-cheat measures. While the client-side cosmetic mods that this tool is capable of producing are unlikely to trigger those measures (and has yet to do so in over 40 hours of personal testing), modding of any sort is done entirely at the risk of the end-user and neither ToastedShoes, Kboy, Irastris, GitHub, Nexus Mods, or any other entity can be held responsible for damages that may result from utilizing this tool and/or mods produced with it. <ins>**You have been warned!**</ins>
 
-## What's Different in Boxed Edition?
-Boxed Edition aims to bring quality of life features to the Helldivers 2 Modding tools. There is much that has been improved with the tools and much that still needs to be. If you have any suggestions please [make an issue](https://github.com/Boxofbiscuits97/io_scene_helldivers2/issues). Here's what we have so far:
+## What's Different in Community Edition?
+Community Edition aims to bring quality of life features to the Helldivers 2 Modding tools. There is much that has been improved with the tools and much that still needs to be. If you have any suggestions please [make an issue](https://github.com/Boxofbiscuits97/HD2SDK-CommunityEdition/issues). Here's what we have so far:
 
 ### Features
 - **Listed Found Archives** so you don't manually have to select and load Archives by their IDs
@@ -23,7 +23,7 @@ Boxed Edition aims to bring quality of life features to the Helldivers 2 Modding
 The developers of the original version of the tool have stated that they are unlikely to update it. Therefore, this community version of it has been made to bring quality of life features and to fix issues with the base version of the tool.
 
 ## Installation
-Download the [latest release build](https://github.com/Boxofbiscuits97/io_scene_helldivers2/releases) and install it into [Blender 4.0](https://www.blender.org/download/previous-versions/). Windows is the only supported operating system.
+Download the [latest release build](https://github.com/Boxofbiscuits97/HD2SDK-CommunityEdition/releases) and install it into [Blender 4.0](https://www.blender.org/download/previous-versions/). Windows is the only supported operating system.
 > [!IMPORTANT]
 > <ins>**You MUST use Blender 4.0**</ins> due to API changes is Blender 4.1 and onward that break the tool.
 
@@ -36,7 +36,7 @@ We've taken the time to write a tutorial focused on armor modding which should a
 - [Early Youtube Tutorial for Models](https://youtu.be/jdz-JeLvCY4)
 
 ### Discords
-- [Community Discord](https://discord.gg/Nzdc7z8Awr) for support with **Boxed Edition** and community tools
+- [Community Discord](https://discord.gg/Nzdc7z8Awr) for support with **Community Edition** and community tools
 - [Toasted Discord](https://discord.gg/ftSZppf) for the original addon creators
 
 
