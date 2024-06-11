@@ -53,9 +53,6 @@ TexID  = 14790446551990181426
 MaterialID  = 16915718763308572383
 
 TextureTypeLookup = {
-    "original": ("pbr: ", "", "", "", "", "normal: ", "", "sss color: ", "", "color: ", "", "", ""),
-    "basic": ("pbr: ", "color: ", "normal: "),
-    "emissive": ("normal/ao/cavity: ", "emission: ", "color/metallic: ")
     "original": (
         "pbr: ", 
         "", 
