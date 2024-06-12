@@ -3338,12 +3338,12 @@ class OBJECT_OT_paste_custom_properties(bpy.types.Operator):
     def execute(self, context):
         global stored_custom_properties
 
-        selectedObjects = context.active_object
+        selectedObjects = context.selected_objects
         if len(selectedObjects) == 0:
             self.report({'WARNING'}, "No active object selected")
             return {'CANCELLED'}
 
-        obj = selectedObjects[0]
+        obj = context.active_object
         if not stored_custom_properties:
             self.report({'WARNING'}, "No custom properties to paste")
             return {'CANCELLED'}
