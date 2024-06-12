@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 3, 1),
+    "version": (1, 3, 2),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -172,6 +172,19 @@ def GetDisplayData():
                     DisplayTocEntries.append([Entry, True])
     return [DisplayTocEntries, DisplayTocTypes]
 
+
+def ApplyAllTransforms(self):
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in bpy.context.scene.objects:
+        obj.select_set(True)
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        obj.select_set(False)
+
+def SaveUnsavedEntries(self):
+    for Entry in Global_TocManager.ActivePatch.TocEntries:
+                if not Entry.IsModified:
+                    Global_TocManager.Save(int(Entry.FileID), Entry.TypeID)
+                    PrettyPrint(f"Saved {int(Entry.FileID)}")
 #endregion
 
 #region Functions: Blender
@@ -333,7 +346,11 @@ def GetMeshData(og_object):
         except: pass
         matNum += 1
 
-    bpy.data.objects.remove(object, do_unlink=True)
+    if object is not None and object.name:
+        PrettyPrint(f"Removing {object.name}")
+        bpy.data.objects.remove(object, do_unlink=True)
+    else:
+        PrettyPrint(f"Current object: {object}")
     return NewMesh
 
 def GetObjectsMeshData():
@@ -1007,12 +1024,15 @@ class TocManager():
     def Load(self, FileID, TypeID, Reload=False, SearchAll=False):
         Entry = self.GetEntry(FileID, TypeID, SearchAll)
         if Entry != None: Entry.Load(Reload)
+
     def Save(self, FileID, TypeID):
         Entry = self.GetEntry(FileID, TypeID)
+        if Entry == None:
+            return False
         if not Global_TocManager.IsInPatch(Entry):
             Entry = self.AddEntryToPatch(FileID, TypeID)
-
-        if Entry != None: Entry.Save()
+        Entry.Save()
+        return True
 
     def CopyPaste(self, Entry, GenID = False, NewID = None):
         if self.ActivePatch == None:
@@ -2410,6 +2430,8 @@ def SaveStingrayMesh(ID, TocData, GpuData, StreamData, StingrayMesh):
     return [toc.Data, gpu.Data, b""]
 
 #endregion
+
+#region Operators: Archives & Patches
 def ArchivesNotLoaded(self):
     if len(Global_TocManager.LoadedArchives) <= 0:
         self.report({'ERROR'}, "No Archives Currently Loaded")
@@ -2424,7 +2446,21 @@ def PatchesNotLoaded(self):
     else:
         return False
 
-#region Operators: Archives & Patches
+def DuplicateIDsInScene(self):
+    CustomObjects = []
+    for obj in bpy.data.objects:
+        if len(obj.keys()) > 1: 
+            for key in obj.keys():
+                if key == 'Z_ObjectID':
+                    PrettyPrint(f"obj {obj} id {obj[key]}")
+                    for otherObject in CustomObjects:
+                        if obj[key] == otherObject[0]:
+                            PrettyPrint(f"found {obj}")
+                            self.report({'ERROR'}, f"Multiple objects with the same HD2 properties are in the scene! Please delete one and try again.\nObjects:{otherObject[1]}, {obj.name}")
+                            return True
+                    CustomObjects.append([obj[key], obj.name])
+    return False
+
 
 class ChangeFilepathOperator(Operator, ImportHelper):
     bl_label = "Change Filepath"
@@ -2538,11 +2574,8 @@ class PatchArchiveOperator(Operator):
         if PatchesNotLoaded(self):
             return{'CANCELLED'}
         
-        for Entry in Global_TocManager.ActivePatch.TocEntries:
-            if not Entry.IsModified:
-                Global_TocManager.Save(int(Entry.FileID), Entry.TypeID)
-                PrettyPrint(f"Saved {int(Entry.FileID)}")
-
+        SaveUnsavedEntries()
+        ApplyAllTransforms()
         Global_TocManager.PatchActiveArchive()
         self.report({'INFO'}, f"Patch Written")
         return{'FINISHED'}
@@ -2772,7 +2805,7 @@ class SaveStingrayMeshOperator(Operator):
 
     object_id: StringProperty()
     def execute(self, context):
-        if PatchesNotLoaded(self):
+        if PatchesNotLoaded(self) or DuplicateIDsInScene(self):
             return {'CANCELLED'}
         Global_TocManager.Save(int(self.object_id), MeshID)
         return{'FINISHED'}
@@ -2783,7 +2816,12 @@ class BatchSaveStingrayMeshOperator(Operator):
     bl_description = "Saves Meshes"
 
     def execute(self, context):
+        if PatchesNotLoaded(self):
+            return{'CANCELLED'}
+
         objects = bpy.context.selected_objects
+        if len(objects) == 0:
+            self.report({'WARNING'}, "No Objects Selected")
         bpy.ops.object.select_all(action='DESELECT')
         IDs = []
         for object in objects:
@@ -2792,15 +2830,18 @@ class BatchSaveStingrayMeshOperator(Operator):
                 if ID not in IDs:
                     IDs.append(ID)
             except:
-                pass
+                self.report({'ERROR'}, f"{object.name} has no HD2 custom properties")
+                return{'CANCELLED'}
         for ID in IDs:
             for object in objects:
                 try:
                     if object["Z_ObjectID"] == ID:
                        object.select_set(True)
                 except: pass
-
-            Global_TocManager.Save(int(ID), MeshID)
+            wasSaved = Global_TocManager.Save(int(ID), MeshID)
+            if not wasSaved:
+                self.report({'ERROR'}, f"Archive for entry being saved is not loaded. HD2 Property ObjectID: {ID}")
+                return{'CANCELLED'}
         return{'FINISHED'}
 
 #endregion
@@ -3272,12 +3313,14 @@ class OBJECT_OT_copy_custom_properties(bpy.types.Operator):
 
     def execute(self, context):
         global stored_custom_properties
-        obj = context.active_object
-
-        if obj is None:
+        
+        selectedObjects = context.selected_objects
+        if len(selectedObjects) == 0:
             self.report({'WARNING'}, "No active object selected")
             return {'CANCELLED'}
+        PrettyPrint(selectedObjects)
 
+        obj = context.active_object
         stored_custom_properties.clear()
         for key, value in obj.items():
             if key not in obj.bl_rna.properties:  # Skip built-in properties
@@ -3294,12 +3337,13 @@ class OBJECT_OT_paste_custom_properties(bpy.types.Operator):
 
     def execute(self, context):
         global stored_custom_properties
-        obj = context.active_object
 
-        if obj is None:
+        selectedObjects = context.active_object
+        if len(selectedObjects) == 0:
             self.report({'WARNING'}, "No active object selected")
             return {'CANCELLED'}
 
+        obj = selectedObjects[0]
         if not stored_custom_properties:
             self.report({'WARNING'}, "No custom properties to paste")
             return {'CANCELLED'}
@@ -3309,12 +3353,13 @@ class OBJECT_OT_paste_custom_properties(bpy.types.Operator):
 
         self.report({'INFO'}, f"Pasted {len(stored_custom_properties)} custom properties")
         return {'FINISHED'}
-    
+
 def CustomPropertyContext(self, context):
     layout = self.layout
     layout.separator()
     layout.operator("object.copy_custom_properties", icon= 'COPYDOWN')
     layout.operator("object.paste_custom_properties", icon= 'PASTEDOWN')
+    layout.operator("helldiver2.archive_mesh_batchsave", icon= 'FILE_BLEND',)
 
 #endregion
 
