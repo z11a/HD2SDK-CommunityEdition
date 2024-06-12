@@ -3351,6 +3351,9 @@ class OBJECT_OT_paste_custom_properties(bpy.types.Operator):
         for key, value in stored_custom_properties.items():
             obj[key] = value
 
+        for area in bpy.context.screen.areas:
+            area.tag_redraw()
+
         self.report({'INFO'}, f"Pasted {len(stored_custom_properties)} custom properties")
         return {'FINISHED'}
 
