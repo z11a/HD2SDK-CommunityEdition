@@ -2574,8 +2574,8 @@ class PatchArchiveOperator(Operator):
         if PatchesNotLoaded(self):
             return{'CANCELLED'}
         
-        SaveUnsavedEntries()
-        ApplyAllTransforms()
+        SaveUnsavedEntries(self)
+        ApplyAllTransforms(self)
         Global_TocManager.PatchActiveArchive()
         self.report({'INFO'}, f"Patch Written")
         return{'FINISHED'}
