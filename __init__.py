@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 3, 2),
+    "version": (1, 4, 0),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -173,12 +173,18 @@ def GetDisplayData():
     return [DisplayTocEntries, DisplayTocTypes]
 
 
-def ApplyAllTransforms(self):
+def ApplyAllTransforms(self, FileID):
     bpy.ops.object.select_all(action='DESELECT')
+    PrettyPrint(f"id: {FileID}")
     for obj in bpy.context.scene.objects:
-        obj.select_set(True)
-        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-        obj.select_set(False)
+        try:
+            id = int(obj['Z_ObjectID'])
+            if FileID == id:
+                obj.select_set(True)
+                bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+                obj.select_set(False)
+        except:
+            id = None
 
 def SaveUnsavedEntries(self):
     for Entry in Global_TocManager.ActivePatch.TocEntries:
@@ -1026,6 +1032,7 @@ class TocManager():
         if Entry != None: Entry.Load(Reload)
 
     def Save(self, FileID, TypeID):
+        ApplyAllTransforms(self, FileID)
         Entry = self.GetEntry(FileID, TypeID)
         if Entry == None:
             return False
@@ -2575,7 +2582,6 @@ class PatchArchiveOperator(Operator):
             return{'CANCELLED'}
         
         SaveUnsavedEntries(self)
-        ApplyAllTransforms(self)
         Global_TocManager.PatchActiveArchive()
         self.report({'INFO'}, f"Patch Written")
         return{'FINISHED'}
@@ -2802,6 +2808,7 @@ class SaveStingrayMeshOperator(Operator):
     bl_label  = "Save Mesh"
     bl_idname = "helldiver2.archive_mesh_save"
     bl_description = "Saves Mesh"
+    bl_options = {'REGISTER', 'UNDO'} 
 
     object_id: StringProperty()
     def execute(self, context):
@@ -2814,6 +2821,7 @@ class BatchSaveStingrayMeshOperator(Operator):
     bl_label  = "Save Meshes"
     bl_idname = "helldiver2.archive_mesh_batchsave"
     bl_description = "Saves Meshes"
+    bl_options = {'REGISTER', 'UNDO'} 
 
     def execute(self, context):
         if PatchesNotLoaded(self):
