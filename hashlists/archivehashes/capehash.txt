@@ -1,18 +1,19 @@
-11a35cf5481b8b04 Blazing Samaritan
-2c1d2e2106bea32b Mantle of True Citizenship
-47c136bfceca8c87 Unblemished Allegiance
+11a35cf5481b8b04 Blazing Samaritan (Set 1)
+2c1d2e2106bea32b Mantle of True Citizenship (Set 1)
+47c136bfceca8c87 Unblemished Allegiance (Old Unused)
 5271f63cc59292dd Liberty's Herald
 58dbd3805dc9d389 Fallen Hero's Vengeance
-cf3ecbab2a0f09fb Fallen Hero's Vengeance
-6a1ceba3a8c5bebb Tyrant Hunter
-71da7b69dd726112 Cloak of Posterity's Gratitude
+6a1ceba3a8c5bebb Tyrant Hunter (Set 1)
+71da7b69dd726112 Cloak of Posterity's Gratitude (Set 2)
 8accb02655b5fcef The Cape of Stars and Suffrage
 9b09c29b50048fbc Independence Bringer
 a580d70e1ef5860b Judgement Day
 b40859ee5a6aa5b3 Cresting Honor
-c1594d627b42962d Botslayer
+c1594d627b42962d Botslayer (Set 1)
 fbb7a18a2e7a4355 Tideturner
-ff46cca8b18f1236 Bastion of Integrity
-db868fbad274f20d Eagle's Fury
+ff46cca8b18f1236 Bastion of Integrity (Set 1)
+db868fbad274f20d Eagle's Fury (Set 1)
 507f6c287affd8bc Drape of Glory
 4b3085719366f5f2 Unblemished Allegiance
+0a499a5c1d48cb41 Executioner's Canopy (Set 2)
+3a48feed7d3ea992 Mark of the Crimson Fang (Set 2)

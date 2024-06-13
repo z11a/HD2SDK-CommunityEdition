@@ -622,7 +622,7 @@ def LoadNameHashes():
             Loaded.append(int(parts[0]))
     with open(Global_friendlynamespath, 'r') as f:
         for line in f.readlines():
-            parts = line.split(" ")
+            parts = line.split(" ", 1)
             if int(parts[0]) not in Loaded:
                 Global_NameHashes.append([int(parts[0]), parts[1].replace("\n", "")])
                 Loaded.append(int(parts[0]))

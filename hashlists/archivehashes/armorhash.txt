@@ -1,7 +1,8 @@
-4ceb3d4e31097c68 B-01 Tactical
-519cc1ec2eb56e1d B-01 Tactical
-562a45e9bc984eb9 B-01 Tactical
-58e4bd4b2278d15c B-01 Tactical
+4ceb3d4e31097c68 B-01 Tactical (Style 1)
+562a45e9bc984eb9 B-01 Tactical (Style 2)
+6cd3d55c05d4eac1 B-01 Tactical (Style 3)
+519cc1ec2eb56e1d B-01 Tactical (Style 4)
+58e4bd4b2278d15c TR-7 Ambassador of the Brand
 2d25ef67b7d87ea3 CM-09 Bonesnapper
 31d06451a09679f1 FS-05 Marksman
 8670598c1f4462dc FS-05 Marksman
@@ -10,7 +11,6 @@ d7e0e8a6c8ab0e2c FS-05 Marksman
 9102938b4b2aef9d FS-23 Battle Master
 0bb13de574d4acce SC-34 Infiltrator
 5e0dba19a567fb99 DP-53 Saviour of the Free
-6cd3d55c05d4eac1 B-01 Tactical
 88ccc33c4cca4d20 CE-81 Juggernaut
 e54eaa26d836a2bf SC-30 Trailblazer Scout
 b0db7f4f0a11debd CM-14 Physician
