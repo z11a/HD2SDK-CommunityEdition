@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 4, 1),
+    "version": (1, 4, 2),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -1032,7 +1032,7 @@ class TocManager():
         if Entry != None: Entry.Load(Reload)
 
     def Save(self, FileID, TypeID):
-        ApplyAllTransforms(self, FileID)
+        #ApplyAllTransforms(self, FileID)
         Entry = self.GetEntry(FileID, TypeID)
         if Entry == None:
             return False
