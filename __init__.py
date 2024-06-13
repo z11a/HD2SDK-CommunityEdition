@@ -2135,6 +2135,7 @@ class StingrayMeshFile:
     def SerializeIndexBuffer(self, gpu, Stream_Info, stream_idx, OrderedMeshes):
         # get indices
         IndexOffset  = 0
+        CompiledIncorrectly = False
         if gpu.IsWriting():Stream_Info.IndexBufferOffset = gpu.tell()
         for mesh in OrderedMeshes[stream_idx][1]:
             Mesh_Info = self.MeshInfoArray[self.DEV_MeshInfoMap[mesh.MeshInfoIndex]]
@@ -2175,10 +2176,19 @@ class StingrayMeshFile:
                     Section.IndexOffset = IndexOffset
                     PrettyPrint(f"Updated Section Offset: {Section.IndexOffset}")
                 for fidx in range(int(Section.NumIndices/3)):
-                    v1 = IndexInt(mesh.Indices[TotalIndex][0])
-                    v2 = IndexInt(mesh.Indices[TotalIndex][1])
-                    v3 = IndexInt(mesh.Indices[TotalIndex][2])
-                    mesh.Indices[TotalIndex] = [v1, v2, v3]
+                    indices = mesh.Indices[TotalIndex]
+                    for i in range(3):
+                        value = indices[i]
+                        if not (0 <= value <= 0xffff) and IndexStride == 2:
+                            PrettyPrint(f"Index: {value} TotalIndex: {TotalIndex}indecies out of bounds", "ERROR")
+                            CompiledIncorrectly = True
+                            value = min(max(0, value), 0xffff)
+                        elif not (0 <= value <= 0xffffffff) and IndexStride == 4:
+                            PrettyPrint(f"Index: {value} TotalIndex: {TotalIndex} indecies out of bounds", "ERROR")
+                            CompiledIncorrectly = True
+                            value = min(max(0, value), 0xffffffff)
+                        indices[i] = IndexInt(value)
+                    mesh.Indices[TotalIndex] = indices
                     TotalIndex += 1
                 IndexOffset  += Section.NumIndices
         # update stream info
