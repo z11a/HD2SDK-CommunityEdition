@@ -8,7 +8,7 @@ bl_info = {
 #region Imports
 
 # System
-import ctypes, os, tempfile, subprocess, time, webbrowser
+import ctypes, os, tempfile, subprocess, time, webbrowser, shutil
 import random as r
 from copy import deepcopy
 from math import ceil
@@ -1086,7 +1086,7 @@ class TocManager():
     def PatchActiveArchive(self):
         self.ActivePatch.ToFile()
 
-    def CreatePatchFromActive(self):
+    def CreatePatchFromActive(self, name="New Patch"):
         if self.ActiveArchive == None:
             raise Exception("No Archive exists to create patch from, please open one first")
 
@@ -1101,6 +1101,8 @@ class TocManager():
         else:
             path += ".patch_0"
         self.ActivePatch.UpdatePath(path)
+        self.ActivePatch.LocalName = name
+        PrettyPrint(self.ActivePatch.LocalName)
         self.Patches.append(self.ActivePatch)
 
     def SetActivePatch(self, Patch):
@@ -2598,17 +2600,27 @@ class CreatePatchFromActiveOperator(Operator):
     bl_idname = "helldiver2.archive_createpatch"
     bl_description = "Creates Patch from Current Active Archive"
 
+    patch_name: StringProperty(name="Patch Name")
+
     def execute(self, context):
         if ArchivesNotLoaded(self):
             return{'CANCELLED'}
         
-        Global_TocManager.CreatePatchFromActive()
+        Global_TocManager.CreatePatchFromActive(self.patch_name)
 
         # Redraw
         for area in context.screen.areas:
             if area.type == "VIEW_3D": area.tag_redraw()
         
         return{'FINISHED'}
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+    
+    def draw(self, context):
+        layout = self.layout
+
+        layout.prop(self, "patch_name")
 
 class PatchArchiveOperator(Operator):
     bl_label = "Patch Archive"
@@ -2625,6 +2637,78 @@ class PatchArchiveOperator(Operator):
         self.report({'INFO'}, f"Patch Written")
         return{'FINISHED'}
 
+class RenamePatchOperator(Operator):
+    bl_label = "Rename Patch"
+    bl_idname = "helldiver2.rename_patch"
+    bl_description = "Change Name of Current Active Patch"
+
+    patch_name: StringProperty(name="Patch Name")
+
+    def execute(self, context):
+        if PatchesNotLoaded(self):
+            return{'CANCELLED'}
+        
+        Global_TocManager.ActivePatch.LocalName = self.patch_name
+
+        # Redraw
+        for area in context.screen.areas:
+            if area.type == "VIEW_3D": area.tag_redraw()
+        
+        return{'FINISHED'}
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+    
+    def draw(self, context):
+        layout = self.layout
+
+        layout.prop(self, "patch_name")
+
+class ExportPatchAsZipOperator(Operator, ImportHelper):
+    bl_label = "Export Patch"
+    bl_idname = "helldiver2.export_patch"
+    bl_description = "Exports the Current Active Patch as a Zip File"
+    
+    filename_ext = "."
+    use_filter_folder = True
+    
+    def execute(self, context):
+        if PatchesNotLoaded(self):
+            return {'CANCELLED'}
+        
+        exportpath = self.properties.filepath
+        if not os.path.isdir(exportpath):
+            msg = "Please select a directory, not a file:\n" + exportpath
+            self.report({'WARNING'}, msg)
+            return {'CANCELLED'}
+        
+        patchName = Global_TocManager.ActivePatch.LocalName
+        if patchName == "":
+            patchName = "unnamed patch"
+        patchFile = Global_TocManager.ActivePatch.Name
+        zipPath = exportpath + patchName
+        tempDirectory = bpy.app.tempdir + patchName
+        patchPath = Global_gamepath + patchFile
+
+        if not os.path.exists(tempDirectory):
+            os.makedirs(tempDirectory)
+        if not os.path.exists(patchPath):
+            self.report({'ERROR'}, "No Patch Has Been Written Yet")
+            return {'CANCELLED'}
+        file = patchPath
+        shutil.copyfile(file, f"{tempDirectory}\{patchFile}")
+        file = patchPath + ".gpu_resources"
+        shutil.copyfile(file, f"{tempDirectory}\{patchFile}.gpu_resources")
+        file = patchPath + ".stream"
+        shutil.copyfile(file, f"{tempDirectory}\{patchFile}.stream")
+        shutil.make_archive(zipPath, 'zip', tempDirectory)
+
+        if os.path.exists(f"{zipPath}.zip"):
+            self.report({'INFO'}, f"{patchName} Exported Successfully")
+        else: 
+            self.report({'ERROR'}, f"Failed to Export {patchName}")
+
+        return {'FINISHED'}
 #endregion
 
 #region Operators: Entries
@@ -3433,7 +3517,7 @@ def LoadedArchives_callback(scene, context):
     return [(Archive.Name, GetArchiveNameFromID(Archive.Name) if GetArchiveNameFromID(Archive.Name) != "" else Archive.Name, Archive.Name) for Archive in Global_TocManager.LoadedArchives]
 
 def Patches_callback(scene, context):
-    return [(Archive.Name, Archive.Name, "") for Archive in Global_TocManager.Patches]
+    return [(Archive.Name, Archive.LocalName if Archive.LocalName != "" else "unnamed patch", Archive.Name) for Archive in Global_TocManager.Patches]
 
 class Hd2ToolPanelSettings(PropertyGroup):
     # Patches
@@ -3566,12 +3650,14 @@ class HellDivers2ToolsPanel(Panel):
 
         row.operator("helldiver2.archive_createpatch", icon= 'COLLECTION_NEW', text="New Patch")
         row.operator("helldiver2.archive_export", icon= 'DISC', text="Write Patch")
+        row.operator("helldiver2.export_patch", icon= 'EXPORT')
         row.operator("helldiver2.patches_unloadall", icon= 'FILE_REFRESH', text="")
 
         row = layout.row()
         row.prop(scene.Hd2ToolPanelSettings, "Patches", text="Patches")
         if len(Global_TocManager.Patches) > 0:
             Global_TocManager.SetActivePatchByName(scene.Hd2ToolPanelSettings.Patches)
+        row.operator("helldiver2.rename_patch", icon='GREASEPENCIL', text="")
         row.operator("helldiver2.archive_import", icon= 'FILEBROWSER', text="").is_patch = True
 
         # Draw Archive Contents
@@ -3582,7 +3668,10 @@ class HellDivers2ToolsPanel(Panel):
             name = GetArchiveNameFromID(ArchiveID)
             title = f"{name}    ID: {ArchiveID}"
         if Global_TocManager.ActivePatch != None and scene.Hd2ToolPanelSettings.PatchOnly:
-            title = f"Patch: {Global_TocManager.ActivePatch.LocalName}    File: {Global_TocManager.ActivePatch.Name}"
+            name = Global_TocManager.ActivePatch.LocalName
+            if name == "":
+                name = "unnamed patch"
+            title = f"Patch: {name}    File: {Global_TocManager.ActivePatch.Name}"
         row.prop(scene.Hd2ToolPanelSettings, "ContentsExpanded",
             icon="DOWNARROW_HLT" if scene.Hd2ToolPanelSettings.ContentsExpanded else "RIGHTARROW",
             icon_only=True, emboss=False, text=title)
@@ -3859,6 +3948,8 @@ classes = (
     CopyCustomPropertyOperator,
     PasteCustomPropertyOperator,
     CopyArchiveIDOperator,
+    ExportPatchAsZipOperator,
+    RenamePatchOperator,
 )
 
 Global_TocManager = TocManager()
