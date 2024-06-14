@@ -807,6 +807,7 @@ class StreamToc:
         self.TocEntries = []
         self.Path = ""
         self.Name = ""
+        self.LocalName = ""
 
     def Serialize(self, SerializeData=True):
         # Create Toc Types Structs
@@ -3416,6 +3417,8 @@ class CopyArchiveIDOperator(Operator):
     bl_description = "Copies the Active Archive's ID to Clipboard"
 
     def execute(self, context):
+        if ArchivesNotLoaded(self):
+            return {'CANCELLED'}
         archiveID = str(Global_TocManager.ActiveArchive.Name)
         bpy.context.window_manager.clipboard = archiveID
         self.report({'INFO'}, f"Copied Archive ID: {archiveID}")
@@ -3572,18 +3575,19 @@ class HellDivers2ToolsPanel(Panel):
         row.operator("helldiver2.archive_import", icon= 'FILEBROWSER', text="").is_patch = True
 
         # Draw Archive Contents
-        row = layout.row()
-        title = ""
+        row = layout.row(); row = layout.row()
+        title = "No Archive Loaded"
         if Global_TocManager.ActiveArchive != None:
             ArchiveID = Global_TocManager.ActiveArchive.Name
             name = GetArchiveNameFromID(ArchiveID)
             title = f"{name}    ID: {ArchiveID}"
+        if Global_TocManager.ActivePatch != None and scene.Hd2ToolPanelSettings.PatchOnly:
+            title = f"Patch: {Global_TocManager.ActivePatch.LocalName}    File: {Global_TocManager.ActivePatch.Name}"
         row.prop(scene.Hd2ToolPanelSettings, "ContentsExpanded",
             icon="DOWNARROW_HLT" if scene.Hd2ToolPanelSettings.ContentsExpanded else "RIGHTARROW",
             icon_only=True, emboss=False, text=title)
-        if title != "":
-            row.prop(scene.Hd2ToolPanelSettings, "PatchOnly", text="")
-            row.operator("helldiver2.copy_archive_id", icon='COPY_ID', text="")
+        row.prop(scene.Hd2ToolPanelSettings, "PatchOnly", text="")
+        row.operator("helldiver2.copy_archive_id", icon='COPY_ID', text="")
 
         # Get Display Data
         DisplayData = GetDisplayData()
