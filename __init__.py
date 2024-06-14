@@ -2523,9 +2523,9 @@ class DefaultLoadArchiveOperator(Operator):
         return{'FINISHED'}
       
 class LoadArchiveOperator(Operator, ImportHelper):
-    bl_label = "Load Archive"
+    bl_label = "Manually Load Archive"
     bl_idname = "helldiver2.archive_import"
-    bl_description = "Manually Load Archive from Helldivers Data Folder"
+    bl_description = "Loads a Selected Archive from Helldivers Data Folder"
 
     files: CollectionProperty(type=bpy.types.OperatorFileListElement,options={"HIDDEN", "SKIP_SAVE"})
     is_patch: BoolProperty(name="is_patch", default=False, options={'HIDDEN'})
@@ -3519,11 +3519,11 @@ class HellDivers2ToolsPanel(Panel):
         # Draw Archive Import/Export Buttons
         row = layout.row(); row = layout.row()
         row.operator("helldiver2.archive_import_default", icon= 'SOLO_ON', text="")
-        row.operator("helldiver2.archive_import", icon= 'IMPORT', text= "").is_patch = False
         row.operator("helldiver2.search_archives", icon= 'VIEWZOOM')
         row.operator("helldiver2.archive_unloadall", icon= 'FILE_REFRESH', text="")
         row = layout.row()
         row.prop(scene.Hd2ToolPanelSettings, "LoadedArchives", text="Archives")
+        row.operator("helldiver2.archive_import", icon= 'FILEBROWSER', text= "").is_patch = False
         row = layout.row()
         if len(Global_TocManager.LoadedArchives) > 0:
             Global_TocManager.SetActiveByName(scene.Hd2ToolPanelSettings.LoadedArchives)
