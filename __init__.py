@@ -3541,6 +3541,7 @@ class HellDivers2ToolsPanel(Panel):
             # Draw Bulk Loader Extras
             row = layout.row()
             row.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
+            layout.separator()
 
         # Draw Archive Import/Export Buttons
         row = layout.row(); row = layout.row()
