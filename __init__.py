@@ -647,6 +647,8 @@ def LoadArchiveHashes():
     LoadHash(Global_terminidhashpath, "Terminid: ")
     LoadHash(Global_automatonhashpath, "Automaton: ")
 
+    Global_ArchiveHashes.append(["9ba626afa44a3aa3", "SDK: Base Patch Archive"])
+
 #endregion
 
 # region Configuration
@@ -3574,10 +3576,8 @@ class HellDivers2ToolsPanel(Panel):
         title = ""
         if Global_TocManager.ActiveArchive != None:
             ArchiveID = Global_TocManager.ActiveArchive.Name
-            title = GetArchiveNameFromID(ArchiveID)
-            if title != "":
-                title = title + ArchiveID[2:]
-            else: title = "ArchiveID: " + ArchiveID
+            name = GetArchiveNameFromID(ArchiveID)
+            title = f"{name}    ID: {ArchiveID}"
         row.prop(scene.Hd2ToolPanelSettings, "ContentsExpanded",
             icon="DOWNARROW_HLT" if scene.Hd2ToolPanelSettings.ContentsExpanded else "RIGHTARROW",
             icon_only=True, emboss=False, text=title)
