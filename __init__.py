@@ -3349,9 +3349,9 @@ class GithubOperator(Operator):
 #region Operators: Context Menu
 
 stored_custom_properties = {}
-class OBJECT_OT_copy_custom_properties(bpy.types.Operator):
+class CopyCustomPropertyOperator(Operator):
     bl_label = "Copy HD2 Properties"
-    bl_idname = "object.copy_custom_properties"
+    bl_idname = "helldiver2.copy_custom_properties"
     bl_description = "Copies Custom Property Data for Helldivers 2 Objects"
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -3373,9 +3373,9 @@ class OBJECT_OT_copy_custom_properties(bpy.types.Operator):
         self.report({'INFO'}, f"Copied {len(stored_custom_properties)} custom properties")
         return {'FINISHED'}
 
-class OBJECT_OT_paste_custom_properties(bpy.types.Operator):
+class PasteCustomPropertyOperator(Operator):
     bl_label = "Paste HD2 Properties"
-    bl_idname = "object.paste_custom_properties"
+    bl_idname = "helldiver2.paste_custom_properties"
     bl_description = "Pastes Custom Property Data for Helldivers 2 Objects"
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -3404,8 +3404,8 @@ class OBJECT_OT_paste_custom_properties(bpy.types.Operator):
 def CustomPropertyContext(self, context):
     layout = self.layout
     layout.separator()
-    layout.operator("object.copy_custom_properties", icon= 'COPYDOWN')
-    layout.operator("object.paste_custom_properties", icon= 'PASTEDOWN')
+    layout.operator("helldiver2.copy_custom_properties", icon= 'COPYDOWN')
+    layout.operator("helldiver2.paste_custom_properties", icon= 'PASTEDOWN')
     layout.operator("helldiver2.archive_mesh_batchsave", icon= 'FILE_BLEND',)
 
 class CopyArchiveIDOperator(Operator):
@@ -3851,8 +3851,8 @@ classes = (
     UnloadPatchesOperator,
     GithubOperator,
     ChangeFilepathOperator,
-    OBJECT_OT_paste_custom_properties,
-    OBJECT_OT_copy_custom_properties,
+    CopyCustomPropertyOperator,
+    PasteCustomPropertyOperator,
     CopyArchiveIDOperator,
 )
 
