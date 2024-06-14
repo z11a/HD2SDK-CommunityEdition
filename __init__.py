@@ -20,7 +20,7 @@ import configparser
 # Blender
 import bpy, bmesh, mathutils
 from bpy_extras.io_utils import ImportHelper, ExportHelper
-from bpy.props import StringProperty, BoolProperty, IntProperty, EnumProperty, PointerProperty
+from bpy.props import StringProperty, BoolProperty, IntProperty, EnumProperty, PointerProperty, CollectionProperty
 from bpy.types import Panel, Operator, PropertyGroup, Scene, Menu
 
 # Local
@@ -544,7 +544,13 @@ def GetArchiveNameFromID(EntryID):
     for hash in Global_ArchiveHashes:
         if hash[0] == EntryID:
             return hash[1]
-    return EntryID
+    return ""
+
+def GetArchiveIDFromName(Name):
+    for hash in Global_ArchiveHashes:
+        if hash[1] == Name:
+            return hash[0]
+    return ""
 
 def HasFriendlyName(ID):
     for hash_info in Global_NameHashes:
@@ -651,7 +657,7 @@ def InitializeConfig():
         config = configparser.ConfigParser()
         config.read(Global_configpath, encoding='utf-8')
         Global_gamepath = config['DEFAULT']['filepath']
-        PrettyPrint(f"Loaded data folder path at: {Global_gamepath}")
+        PrettyPrint(f"Loaded Data Folder: {Global_gamepath}")
 
     else:
         UpdateConfig(Global_defaultgamepath)
@@ -954,6 +960,8 @@ class TocManager():
         for Archive in self.LoadedArchives:
             if Archive.Path == path:
                 return Archive
+        archiveID = path.replace(Global_gamepath, '')
+        PrettyPrint(f"Loading Archive: {archiveID}: {GetArchiveNameFromID(archiveID)}")
         toc = StreamToc()
         toc.FromFile(path)
         if SetActive and not IsPatch:
@@ -2519,18 +2527,25 @@ class LoadArchiveOperator(Operator, ImportHelper):
     bl_idname = "helldiver2.archive_import"
     bl_description = "Manually Load Archive from Helldivers Data Folder"
 
-    filter_glob: StringProperty(default='*', options={'HIDDEN'})
+    files: CollectionProperty(type=bpy.types.OperatorFileListElement,options={"HIDDEN", "SKIP_SAVE"})
     is_patch: BoolProperty(name="is_patch", default=False, options={'HIDDEN'})
+    #files = CollectionProperty(name='File paths', type=bpy.types.PropertyGroup)
 
     def __init__(self):
         self.filepath = bpy.path.abspath(Global_gamepath)
 
     def execute(self, context):
         # Sanitize path by removing any provided extension, so the correct TOC file is loaded
-        path = Path(self.filepath)
-        if not path.suffix.startswith(".patch_"): path = path.with_suffix("")
+        filepaths = [Global_gamepath + f.name for f in self.files]
+        oldLoadedLength = len(Global_TocManager.LoadedArchives)
+        for filepath in filepaths:
+            if not os.path.exists(filepath) or filepath.endswith(".ini") or filepath.endswith(".data"):
+                continue
+            path = Path(filepath)
+            if not path.suffix.startswith(".patch_"): path = path.with_suffix("")
 
-        Global_TocManager.LoadArchive(str(path), True, self.is_patch)
+            archiveToc = Global_TocManager.LoadArchive(str(path), True, self.is_patch)
+        PrettyPrint(f"Loaded {len(Global_TocManager.LoadedArchives) - oldLoadedLength} Archive(s)")
 
         # Redraw
         for area in context.screen.areas:
@@ -3387,7 +3402,7 @@ def CustomPropertyContext(self, context):
 #region Menus and Panels
 
 def LoadedArchives_callback(scene, context):
-    return [(Archive.Name, Archive.Name, "") for Archive in Global_TocManager.LoadedArchives]
+    return [(Archive.Name, GetArchiveNameFromID(Archive.Name) if GetArchiveNameFromID(Archive.Name) != "" else Archive.Name, Archive.Name) for Archive in Global_TocManager.LoadedArchives]
 
 def Patches_callback(scene, context):
     return [(Archive.Name, Archive.Name, "") for Archive in Global_TocManager.Patches]
@@ -3536,7 +3551,7 @@ class HellDivers2ToolsPanel(Panel):
         if Global_TocManager.ActiveArchive != None:
             ArchiveID = Global_TocManager.ActiveArchive.Name
             title = GetArchiveNameFromID(ArchiveID)
-            if title != Global_TocManager.ActiveArchive.Name:
+            if title != "":
                 title = title + ArchiveID[2:]
             else: title = "ArchiveID: " + ArchiveID
         row.prop(scene.Hd2ToolPanelSettings, "ContentsExpanded",
