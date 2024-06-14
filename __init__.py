@@ -638,7 +638,7 @@ def LoadHash(path, title):
     with open(path, 'r') as f:
         for line in f.readlines():
             parts = line.split(" ", 1)
-            Global_ArchiveHashes.append([parts[0], title + parts[1].replace("\n", "") + " #" + str(parts[0])[:2]])
+            Global_ArchiveHashes.append([parts[0], title + parts[1].replace("\n", "")])
                 
 def LoadArchiveHashes():
     LoadHash(Global_armorhashpath, "Armor: ")
@@ -961,7 +961,8 @@ class TocManager():
             if Archive.Path == path:
                 return Archive
         archiveID = path.replace(Global_gamepath, '')
-        PrettyPrint(f"Loading Archive: {archiveID}: {GetArchiveNameFromID(archiveID)}")
+        archiveName = GetArchiveNameFromID(archiveID)
+        PrettyPrint(f"Loading Archive: {archiveID} {archiveName}")
         toc = StreamToc()
         toc.FromFile(path)
         if SetActive and not IsPatch:
@@ -3220,7 +3221,7 @@ class SearchArchivesOperator(Operator):
         else:
             for Archive in self.ArchivesToDisplay:
                 row = layout.row()
-                row.label(text=Archive[1], icon='FILE_ARCHIVE')
+                row.label(text=Archive[1], icon='GROUP')
                 row.operator("helldiver2.archives_import", icon= 'FILE_NEW', text="").paths_str = Global_gamepath + str(Archive[0])
 
     def execute(self, context):
