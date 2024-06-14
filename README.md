@@ -14,10 +14,10 @@ Community Edition aims to bring quality of life features to the Helldivers 2 Mod
 - **Default Archive Button** for the one that patches should be made from
 - **Better Error Handling** for more detailed error messages for when things go wrong
 - **Easier Data Copying** for transferring IDs to custom meshes when overriding game models
+- **Bulk Scene Importing** for using a text file to import many archives at once
 - And **Much More!**
 
 ### Planned
-- **Bulk Scene Importing** for all items in a section
 - **Better Patch Organization** with naming patches and saving WIP patches 
 - **Better Friendly Names** for ability to automatically be generated and to be removed
 
@@ -34,11 +34,11 @@ We've taken the time to write a tutorial focused on armor modding which should a
 
 ## Documentation
 - [Original Google Docs Tutorial](https://docs.google.com/document/d/1SF7iEekmxoDdf0EsJu1ww9u2Cr8vzHyn2ycZS7JlWl0)
-- [Arhicves ID Spreadsheet](https://docs.google.com/spreadsheets/d/1oQys_OI5DWou4GeRE3mW56j7BIi4M7KftBIPAl1ULFw)
+- [Archive IDs Spreadsheet](https://docs.google.com/spreadsheets/d/1oQys_OI5DWou4GeRE3mW56j7BIi4M7KftBIPAl1ULFw)
 - [Early Youtube Tutorial for Models](https://youtu.be/jdz-JeLvCY4)
 
 ### Discords
-- [Community Discord](https://discord.gg/Nzdc7z8Awr) for support with **Community Edition** and community tools
+- [Community Discord](https://discord.gg/Nzdc7z8Awr) for support with **Community Edition**. Ping @khameli0n for access to Modder Channels
 - [Toasted Discord](https://discord.gg/ftSZppf) for the original addon creators
 
 
