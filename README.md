@@ -10,6 +10,7 @@ Community Edition aims to bring quality of life features to the Helldivers 2 Mod
 
 ### Features
 - **Listed Found Archives** so you don't manually have to select and load Archives by their IDs
+- **Easy Naming and Exporting Patches** so that modding is as seamless as possible
 - **Descriptions** for all actions in the tool
 - **Default Archive Button** for the one that patches should be made from
 - **Better Error Handling** for more detailed error messages for when things go wrong
@@ -18,7 +19,6 @@ Community Edition aims to bring quality of life features to the Helldivers 2 Mod
 - And **Much More!**
 
 ### Planned
-- **Better Patch Organization** with naming patches and saving WIP patches 
 - **Better Friendly Names** for ability to automatically be generated and to be removed
 
 ### What About the Original Tool?
