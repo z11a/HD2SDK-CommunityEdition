@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 4, 2),
+    "version": (1, 4, 3),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -994,10 +994,10 @@ class TocManager():
         self.Patches = []
         self.ActivePatch = None
 
-    def BulkLoad(self):
+    def BulkLoad(self, list):
         self.UnloadArchives()
-        archivesList = "8313c9a556b8ee85"
-        Global_TocManager.LoadArchive(archivesList)
+        for itemPath in list:
+            Global_TocManager.LoadArchive(itemPath)
 
     def SetActive(self, Archive):
         if Archive != self.ActiveArchive:
@@ -2571,12 +2571,22 @@ class UnloadPatchesOperator(Operator):
         Global_TocManager.UnloadPatches()
         return{'FINISHED'}
     
-class BulkLoadOperator(Operator):
+class BulkLoadOperator(Operator, ImportHelper):
     bl_label = "Bulk Loader"
     bl_idname = "helldiver2.bulk_load"
+    bl_description = "Loads archives from a list of patch names in a text file"
+
+    open_file_browser: BoolProperty(default=True, options={'HIDDEN'})
+    file: StringProperty(options={'HIDDEN'})
+    
+    filter_glob: StringProperty(options={'HIDDEN'}, default='*.txt')
 
     def execute(self, context):
-        Global_TocManager.BulkLoad()
+        self.file = self.filepath
+        f = open(self.file, "r")
+        entryList = f.read().splitlines()
+        entryList = (Global_gamepath + entry for entry in entryList)
+        Global_TocManager.BulkLoad(entryList)
         return{'FINISHED'}
 
 class CreatePatchFromActiveOperator(Operator):
@@ -3397,6 +3407,18 @@ def CustomPropertyContext(self, context):
     layout.operator("object.paste_custom_properties", icon= 'PASTEDOWN')
     layout.operator("helldiver2.archive_mesh_batchsave", icon= 'FILE_BLEND',)
 
+class CopyArchiveIDOperator(Operator):
+    bl_label = "Copy Archive ID"
+    bl_idname = "helldiver2.copy_archive_id"
+    bl_description = "Copies the Active Archive's ID to Clipboard"
+
+    def execute(self, context):
+        archiveID = str(Global_TocManager.ActiveArchive.Name)
+        bpy.context.window_manager.clipboard = archiveID
+        self.report({'INFO'}, f"Copied Archive ID: {archiveID}")
+
+        return {'FINISHED'}
+
 #endregion
 
 #region Menus and Panels
@@ -3515,6 +3537,9 @@ class HellDivers2ToolsPanel(Panel):
             row = layout.row()
             row.label(text=Global_gamepath)
             row.operator("helldiver2.change_filepath", icon='FILEBROWSER')
+            # Draw Bulk Loader Extras
+            row = layout.row()
+            row.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
 
         # Draw Archive Import/Export Buttons
         row = layout.row(); row = layout.row()
@@ -3528,9 +3553,6 @@ class HellDivers2ToolsPanel(Panel):
         if len(Global_TocManager.LoadedArchives) > 0:
             Global_TocManager.SetActiveByName(scene.Hd2ToolPanelSettings.LoadedArchives)
 
-        # Draw Bulk Loader Extras
-        #row = layout.row()
-        #row.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
 
         # Draw Patch Stuff
         row = layout.row(); row = layout.row()
@@ -3557,7 +3579,9 @@ class HellDivers2ToolsPanel(Panel):
         row.prop(scene.Hd2ToolPanelSettings, "ContentsExpanded",
             icon="DOWNARROW_HLT" if scene.Hd2ToolPanelSettings.ContentsExpanded else "RIGHTARROW",
             icon_only=True, emboss=False, text=title)
-        row.prop(scene.Hd2ToolPanelSettings, "PatchOnly", text="")
+        if title != "":
+            row.prop(scene.Hd2ToolPanelSettings, "PatchOnly", text="")
+            row.operator("helldiver2.copy_archive_id", icon='COPYDOWN', text="")
 
         # Get Display Data
         DisplayData = GetDisplayData()
@@ -3828,6 +3852,7 @@ classes = (
     ChangeFilepathOperator,
     OBJECT_OT_paste_custom_properties,
     OBJECT_OT_copy_custom_properties,
+    CopyArchiveIDOperator,
 )
 
 Global_TocManager = TocManager()
