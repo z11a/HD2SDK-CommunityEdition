@@ -3583,7 +3583,7 @@ class HellDivers2ToolsPanel(Panel):
             icon_only=True, emboss=False, text=title)
         if title != "":
             row.prop(scene.Hd2ToolPanelSettings, "PatchOnly", text="")
-            row.operator("helldiver2.copy_archive_id", icon='COPYDOWN', text="")
+            row.operator("helldiver2.copy_archive_id", icon='COPY_ID', text="")
 
         # Get Display Data
         DisplayData = GetDisplayData()
