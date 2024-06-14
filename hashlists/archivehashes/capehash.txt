@@ -18,3 +18,4 @@ db868fbad274f20d Eagle's Fury (Set 1)
 0a499a5c1d48cb41 Executioner's Canopy (Set 2)
 3a48feed7d3ea992 Mark of the Crimson Fang (Set 2)
 026f37e8ba4c848e Dissident's Nightmare (Set 2)
+08de8206783720c9 Harbinger of True Equality
