@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 5, 0),
+    "version": (1, 5, 1),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -969,8 +969,18 @@ class TocManager():
         toc = StreamToc()
         toc.FromFile(path)
         if SetActive and not IsPatch:
-            self.LoadedArchives.append(toc)
-            self.ActiveArchive = toc
+            if bpy.context.scene.Hd2ToolPanelSettings.DeleteOnLoadArchive:
+                PrettyPrint(f"Prank em john")
+            unloadEmpty = bpy.context.scene.Hd2ToolPanelSettings.UnloadEmptyArchives and bpy.context.scene.Hd2ToolPanelSettings.EnableTools
+            if unloadEmpty:
+                if self.ArchiveNotEmpty(toc):
+                    self.LoadedArchives.append(toc)
+                    self.ActiveArchive = toc
+                else:
+                    PrettyPrint(f"Unloading {archiveID} as it is Empty")
+            else:
+                self.LoadedArchives.append(toc)
+                self.ActiveArchive = toc
         elif SetActive and IsPatch:
             self.Patches.append(toc)
             self.ActivePatch = toc
@@ -986,6 +996,22 @@ class TocManager():
                             self.SearchArchives.append(search_toc)
 
         return toc
+    
+    def ArchiveNotEmpty(self, toc):
+        hasMaterials = False
+        hasTextures = False
+        hasMeshes = False
+        for Entry in toc.TocEntries:
+            type = Entry.TypeID
+            if type == MaterialID:
+                hasMaterials = True
+            elif type == MeshID:
+                hasMeshes = True
+            elif type == TexID:
+                hasTextures = True
+            elif type == CompositeMeshID:
+                hasMeshes = True
+        return hasMaterials or hasTextures or hasMeshes
 
     def UnloadArchives(self):
         # TODO: Make sure all data gets unloaded...
@@ -2591,8 +2617,14 @@ class BulkLoadOperator(Operator, ImportHelper):
         self.file = self.filepath
         f = open(self.file, "r")
         entryList = f.read().splitlines()
+        numEntries = len(entryList)
+        PrettyPrint(f"Loading {numEntries} Archives")
+        numArchives = len(Global_TocManager.LoadedArchives)
         entryList = (Global_gamepath + entry for entry in entryList)
         Global_TocManager.BulkLoad(entryList)
+        numArchives = len(Global_TocManager.LoadedArchives) - numArchives
+        numSkipped = numEntries - numArchives
+        self.report({'INFO'}, f"Loaded {numArchives} Archives. Skipped {numSkipped} Archives")
         return{'FINISHED'}
 
 class CreatePatchFromActiveOperator(Operator):
@@ -2709,6 +2741,19 @@ class ExportPatchAsZipOperator(Operator, ImportHelper):
             self.report({'ERROR'}, f"Failed to Export {patchName}")
 
         return {'FINISHED'}
+    
+class NextArchiveOperator(Operator):
+    bl_label = "Next Archive"
+    bl_idname = "helldiver2.next_archive"
+    bl_description = "Select the next archive in the list of loaded archives"
+
+    def execute(self, context):
+        for index in range(len(Global_TocManager.LoadedArchives)):
+            if Global_TocManager.LoadedArchives[index] == Global_TocManager.ActiveArchive:
+                nextIndex = min(len(Global_TocManager.LoadedArchives) - 1, index + 1)
+                bpy.context.scene.Hd2ToolPanelSettings.LoadedArchives = Global_TocManager.LoadedArchives[nextIndex].Name
+                return {'FINISHED'}
+        return {'CANCELLED'}
 #endregion
 
 #region Operators: Entries
@@ -3541,7 +3586,12 @@ class Hd2ToolPanelSettings(PropertyGroup):
     Force1Group      : BoolProperty(name="Force 1 Group", description = "Force mesh to only have 1 vertex group", default = True)
     AutoLods         : BoolProperty(name="Auto LODs", description = "Automatically generate LOD entries based on LOD0, does not actually reduce the quality of the mesh", default = True)
     # Search
-    SearchField : StringProperty(default = "")
+    SearchField      : StringProperty(default = "")
+
+    # Tools
+    EnableTools           : BoolProperty(name="Research Tools", description = "Custom Archive Searching Tools", default = False)
+    UnloadEmptyArchives   : BoolProperty(name="Unload Empty Archives", description="Unload Archives that do not Contain any Textures, Materials, or Meshes", default = True)
+    DeleteOnLoadArchive   : BoolProperty(name="Nuke Files on Archive Load", description="Delete all Textures, Materials, and Meshes in project when selecting a new archive", default = False)
 
 class HellDivers2ToolsPanel(Panel):
     bl_label = f"Helldivers 2 SDK: Community Edition v{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}"
@@ -3624,12 +3674,21 @@ class HellDivers2ToolsPanel(Panel):
             row.prop(scene.Hd2ToolPanelSettings, "Force2UVs")
             row.prop(scene.Hd2ToolPanelSettings, "Force1Group")
             row.prop(scene.Hd2ToolPanelSettings, "AutoLods")
+            #Custom Searching tools
+            row = layout.row(); row.separator(); row.label(text="Research Tools"); box = row.box(); row = box.grid_flow(columns=1)
+            # Draw Bulk Loader Extras
+            row.prop(scene.Hd2ToolPanelSettings, "EnableTools")
+            if scene.Hd2ToolPanelSettings.EnableTools:
+                row = layout.row(); box = row.box(); row = box.grid_flow(columns=1)
+                #row.label()
+                row.label(text="WARNING! Developer Tools, Please Know What You Are Doing!")
+                row.prop(scene.Hd2ToolPanelSettings, "UnloadEmptyArchives")
+                #row.prop(scene.Hd2ToolPanelSettings, "DeleteOnLoadArchive")
+                row.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
+                layout.separator()
             row = layout.row()
             row.label(text=Global_gamepath)
             row.operator("helldiver2.change_filepath", icon='FILEBROWSER')
-            # Draw Bulk Loader Extras
-            row = layout.row()
-            row.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
             layout.separator()
 
         # Draw Archive Import/Export Buttons
@@ -3639,6 +3698,8 @@ class HellDivers2ToolsPanel(Panel):
         row.operator("helldiver2.archive_unloadall", icon= 'FILE_REFRESH', text="")
         row = layout.row()
         row.prop(scene.Hd2ToolPanelSettings, "LoadedArchives", text="Archives")
+        if scene.Hd2ToolPanelSettings.EnableTools:
+            row.operator("helldiver2.next_archive", icon= 'RIGHTARROW', text="")
         row.operator("helldiver2.archive_import", icon= 'FILEBROWSER', text= "").is_patch = False
         row = layout.row()
         if len(Global_TocManager.LoadedArchives) > 0:
@@ -3950,6 +4011,7 @@ classes = (
     CopyArchiveIDOperator,
     ExportPatchAsZipOperator,
     RenamePatchOperator,
+    NextArchiveOperator,
 )
 
 Global_TocManager = TocManager()
