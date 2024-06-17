@@ -1071,7 +1071,7 @@ class TocManager():
         if Entry != None: Entry.Load(Reload)
 
     def Save(self, FileID, TypeID):
-        ApplyAllTransforms(self, FileID)
+        #ApplyAllTransforms(self, FileID)
         Entry = self.GetEntry(FileID, TypeID)
         if Entry == None:
             PrettyPrint(f"Failed to save entry {FileID}")
