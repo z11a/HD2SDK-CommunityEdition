@@ -2546,8 +2546,21 @@ def AllTransformsApplied(self):
             return True
     return False
 
+def MaterialsNumberNames(self):
+    mesh_objs = [ob for ob in bpy.data.objects if ob.type == 'MESH']
+    for mesh in mesh_objs:
+        invalidMaterials = 0
+        for slot in mesh.material_slots:
+            if slot.material:
+                if not slot.material.name.isnumeric():
+                    invalidMaterials += 1
+        if invalidMaterials > 0:
+            self.report({'ERROR'}, f"Object: {mesh.name} has {invalidMaterials} non Helldivers 2 Materials")
+            return True
+    return False
+
 def MeshNotValidToSave(self):
-    return PatchesNotLoaded(self) or DuplicateIDsInScene(self) or IncorrectVertexGroupNaming(self) or ObjectHasModifiers(self) or AllTransformsApplied(self)
+    return PatchesNotLoaded(self) or DuplicateIDsInScene(self) or IncorrectVertexGroupNaming(self) or ObjectHasModifiers(self) or AllTransformsApplied(self) or MaterialsNumberNames(self)
 
 class ChangeFilepathOperator(Operator, ImportHelper):
     bl_label = "Change Filepath"
