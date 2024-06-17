@@ -2797,6 +2797,18 @@ class ArchiveEntryOperator(Operator):
 
         Global_TocManager.SelectEntries([Entry])
         return {'FINISHED'}
+    
+class MaterialTextureEntryOperator(Operator):
+    bl_label  = "Texture Entry"
+    bl_idname = "helldiver2.material_texture_entry"
+
+    object_id: StringProperty()
+    object_typeid: StringProperty()
+    def execute(self, context):
+        return{'FINISHED'}
+
+    def invoke(self, context, event):
+        return {'FINISHED'}
 
 class AddEntryToPatchOperator(Operator):
     bl_label = "Add To Patch"
@@ -3631,7 +3643,7 @@ class HellDivers2ToolsPanel(Panel):
                     if ddsPath != None: filepath = Path(ddsPath)
                     prefix = TextureTypeLookup[Entry.MaterialTemplate][i] if Entry.MaterialTemplate != None else ""
                     label = filepath.name if ddsPath != None else str(t)
-                    row.label(text=prefix+label, icon='FILE_IMAGE')
+                    row.operator("helldiver2.material_texture_entry", icon='FILE_IMAGE', text=prefix+label, emboss=False) 
                     props = row.operator("helldiver2.material_settex", icon='FILEBROWSER', text="")
                     props.object_id = str(Entry.FileID)
                     props.tex_idx = i
@@ -4033,6 +4045,7 @@ classes = (
     ExportPatchAsZipOperator,
     RenamePatchOperator,
     NextArchiveOperator,
+    MaterialTextureEntryOperator,
 )
 
 Global_TocManager = TocManager()
