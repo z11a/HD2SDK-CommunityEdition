@@ -175,13 +175,14 @@ def GetDisplayData():
 
 def ApplyAllTransforms(self, FileID):
     bpy.ops.object.select_all(action='DESELECT')
-    PrettyPrint(f"id: {FileID}")
+    PrettyPrint(f"Applying transforms to {FileID}")
     for obj in bpy.context.scene.objects:
         try:
             id = int(obj['Z_ObjectID'])
             if FileID == id:
                 obj.select_set(True)
                 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+                obj.rotation_mode = 'QUATERNION'
                 obj.select_set(False)
         except:
             id = None
@@ -1070,7 +1071,7 @@ class TocManager():
         if Entry != None: Entry.Load(Reload)
 
     def Save(self, FileID, TypeID):
-        #ApplyAllTransforms(self, FileID)
+        ApplyAllTransforms(self, FileID)
         Entry = self.GetEntry(FileID, TypeID)
         if Entry == None:
             return False
@@ -2663,6 +2664,9 @@ class PatchArchiveOperator(Operator):
         global Global_TocManager
         if PatchesNotLoaded(self):
             return{'CANCELLED'}
+        
+        
+        #bpy.ops.wm.save_as_mainfile(filepath=)
         
         SaveUnsavedEntries(self)
         Global_TocManager.PatchActiveArchive()
