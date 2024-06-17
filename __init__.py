@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 5, 1),
+    "version": (1, 6, 0),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -178,7 +178,7 @@ def ApplyAllTransforms(self, FileID):
     PrettyPrint(f"Applying transforms to {FileID}")
     for obj in bpy.context.scene.objects:
         try:
-            id = int(obj['Z_ObjectID'])
+            id = int(obj["Z_ObjectID"])
             if FileID == id:
                 obj.select_set(True)
                 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
@@ -652,7 +652,7 @@ def LoadArchiveHashes():
 
 #endregion
 
-# region Configuration
+#region Configuration
 
 def InitializeConfig():
     if os.path.exists(Global_configpath):
@@ -1074,6 +1074,7 @@ class TocManager():
         ApplyAllTransforms(self, FileID)
         Entry = self.GetEntry(FileID, TypeID)
         if Entry == None:
+            PrettyPrint(f"Failed to save entry {FileID}")
             return False
         if not Global_TocManager.IsInPatch(Entry):
             Entry = self.AddEntryToPatch(FileID, TypeID)
@@ -2509,7 +2510,7 @@ def DuplicateIDsInScene(self):
     for obj in bpy.data.objects:
         if len(obj.keys()) > 1: 
             for key in obj.keys():
-                if key == 'Z_ObjectID':
+                if key == "Z_ObjectID":
                     PrettyPrint(f"obj {obj} id {obj[key]}")
                     for otherObject in CustomObjects:
                         if obj[key] == otherObject[0]:
@@ -2986,7 +2987,15 @@ class SaveStingrayMeshOperator(Operator):
     def execute(self, context):
         if PatchesNotLoaded(self) or DuplicateIDsInScene(self):
             return {'CANCELLED'}
-        Global_TocManager.Save(int(self.object_id), MeshID)
+        wasSaved = Global_TocManager.Save(int(self.object_id), MeshID)
+        if not wasSaved:
+                for object in bpy.data.objects:
+                    try:
+                        ID = object["Z_ObjectID"]
+                        self.report({'ERROR'}, f"Archive for entry being saved is not loaded. Object: {object.name} ID: {ID}")
+                        return{'CANCELLED'}
+                    except:
+                        self.report({'ERROR'}, f"Failed to find object with custom property ID")
         return{'FINISHED'}
 
 class BatchSaveStingrayMeshOperator(Operator):
@@ -2996,19 +3005,21 @@ class BatchSaveStingrayMeshOperator(Operator):
     bl_options = {'REGISTER', 'UNDO'} 
 
     def execute(self, context):
-        if PatchesNotLoaded(self):
+        if PatchesNotLoaded(self) or DuplicateIDsInScene(self):
             return{'CANCELLED'}
 
         objects = bpy.context.selected_objects
         if len(objects) == 0:
             self.report({'WARNING'}, "No Objects Selected")
         bpy.ops.object.select_all(action='DESELECT')
+        HD2Objects = []
         IDs = []
         for object in objects:
             try:
                 ID = object["Z_ObjectID"]
                 if ID not in IDs:
                     IDs.append(ID)
+                    #HD2Objects.append(ID, object.name)
             except:
                 self.report({'ERROR'}, f"{object.name} has no HD2 custom properties")
                 return{'CANCELLED'}
@@ -3020,8 +3031,14 @@ class BatchSaveStingrayMeshOperator(Operator):
                 except: pass
             wasSaved = Global_TocManager.Save(int(ID), MeshID)
             if not wasSaved:
-                self.report({'ERROR'}, f"Archive for entry being saved is not loaded. HD2 Property ObjectID: {ID}")
-                return{'CANCELLED'}
+                for object in bpy.data.objects:
+                    try:
+                        if ID == object["Z_ObjectID"]:
+                            self.report({'ERROR'}, f"Archive for entry being saved is not loaded. Object: {object.name}")
+                            return{'CANCELLED'}
+                    except:
+                        PrettyPrint(f"Couldn't find Object: {object.name} at ID: {ID}")
+                self.report({'ERROR'}, f"Archive for entry being saved is not loaded. Could not find custom property object at ID: {ID} B")
         return{'FINISHED'}
 
 #endregion
@@ -3191,7 +3208,7 @@ class AddMaterialOperator(Operator):
         ("emissive", "Emissive", "A basic material with a color, normal, and emission map. Sourced from a vending machine."),
     )
 
-    selected_material: EnumProperty(items=materials, name="Template", default=1)
+    selected_material: EnumProperty(items=materials, name="Template", default=0)
 
     def execute(self, context):
         if PatchesNotLoaded(self):
