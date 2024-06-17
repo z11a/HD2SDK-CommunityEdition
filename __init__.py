@@ -2491,6 +2491,7 @@ def SaveStingrayMesh(ID, TocData, GpuData, StreamData, StingrayMesh):
 #endregion
 
 #region Operators: Archives & Patches
+
 def ArchivesNotLoaded(self):
     if len(Global_TocManager.LoadedArchives) <= 0:
         self.report({'ERROR'}, "No Archives Currently Loaded")
@@ -2520,6 +2521,33 @@ def DuplicateIDsInScene(self):
                     CustomObjects.append([obj[key], obj.name])
     return False
 
+def IncorrectVertexGroupNaming(self):
+    for obj in bpy.data.objects:
+        incorrectGroups = 0
+        for group in obj.vertex_groups:
+            if not group.name.startswith("0_"):
+                incorrectGroups += 1
+        if incorrectGroups > 0:
+            self.report({'ERROR'}, f"Found {incorrectGroups} Incorrect Vertex Group Name Scheming for Object: {obj.name}")
+            return True
+    return False
+
+def ObjectHasModifiers(self):
+    for obj in bpy.data.objects:
+        if obj.modifiers:
+            self.report({'ERROR'}, f"Object: {obj.name} has {len(obj.modifiers)} unapplied modifiers")
+            return True
+    return False
+
+def AllTransformsApplied(self):
+    for obj in bpy.data.objects:
+        if any(obj.location) or any(obj.rotation_euler) or any(scale - 1.0 for scale in obj.scale):
+            self.report({'ERROR'}, f"Object: {obj.name} has unapplied transforms")
+            return True
+    return False
+
+def MeshNotValidToSave(self):
+    return PatchesNotLoaded(self) or DuplicateIDsInScene(self) or IncorrectVertexGroupNaming(self) or ObjectHasModifiers(self) or AllTransformsApplied(self)
 
 class ChangeFilepathOperator(Operator, ImportHelper):
     bl_label = "Change Filepath"
@@ -2997,7 +3025,7 @@ class SaveStingrayMeshOperator(Operator):
 
     object_id: StringProperty()
     def execute(self, context):
-        if PatchesNotLoaded(self) or DuplicateIDsInScene(self):
+        if MeshNotValidToSave(self):
             return {'CANCELLED'}
         wasSaved = Global_TocManager.Save(int(self.object_id), MeshID)
         if not wasSaved:
@@ -3017,7 +3045,7 @@ class BatchSaveStingrayMeshOperator(Operator):
     bl_options = {'REGISTER', 'UNDO'} 
 
     def execute(self, context):
-        if PatchesNotLoaded(self) or DuplicateIDsInScene(self):
+        if MeshNotValidToSave(self):
             return{'CANCELLED'}
 
         objects = bpy.context.selected_objects
