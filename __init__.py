@@ -2684,6 +2684,9 @@ class CreatePatchFromActiveOperator(Operator):
         if ArchivesNotLoaded(self):
             return{'CANCELLED'}
         
+        if Global_TocManager.ActiveArchive.Name != "9ba626afa44a3aa3":
+            self.report({'WARNING'}, f"Patch Created was Not From Default Archive")
+
         Global_TocManager.CreatePatchFromActive(self.patch_name)
 
         # Redraw
