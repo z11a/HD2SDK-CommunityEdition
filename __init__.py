@@ -2508,7 +2508,7 @@ def PatchesNotLoaded(self):
 
 def DuplicateIDsInScene(self):
     CustomObjects = []
-    for obj in bpy.data.objects:
+    for obj in bpy.context.selected_objects:
         if len(obj.keys()) > 1: 
             for key in obj.keys():
                 if key == "Z_ObjectID":
@@ -2522,8 +2522,11 @@ def DuplicateIDsInScene(self):
     return False
 
 def IncorrectVertexGroupNaming(self):
-    for obj in bpy.data.objects:
+    for obj in bpy.context.selected_objects:
         incorrectGroups = 0
+        if len(obj.vertex_groups) <= 0:
+            self.report({'ERROR'}, f"No Vertex Groups Found for Object: {obj.name}")
+            return True
         for group in obj.vertex_groups:
             if not group.name.startswith("0_"):
                 incorrectGroups += 1
@@ -2533,21 +2536,21 @@ def IncorrectVertexGroupNaming(self):
     return False
 
 def ObjectHasModifiers(self):
-    for obj in bpy.data.objects:
+    for obj in bpy.context.selected_objects:
         if obj.modifiers:
             self.report({'ERROR'}, f"Object: {obj.name} has {len(obj.modifiers)} unapplied modifiers")
             return True
     return False
 
 def AllTransformsApplied(self):
-    for obj in bpy.data.objects:
+    for obj in bpy.context.selected_objects:
         if any(obj.location) or any(obj.rotation_euler) or any(scale - 1.0 for scale in obj.scale):
             self.report({'ERROR'}, f"Object: {obj.name} has unapplied transforms")
             return True
     return False
 
 def MaterialsNumberNames(self):
-    mesh_objs = [ob for ob in bpy.data.objects if ob.type == 'MESH']
+    mesh_objs = [ob for ob in bpy.context.selected_objects if ob.type == 'MESH']
     for mesh in mesh_objs:
         invalidMaterials = 0
         for slot in mesh.material_slots:
