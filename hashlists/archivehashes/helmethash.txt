@@ -1,7 +1,7 @@
-fd109bfeeed36726 B-01 Tactical (Style 1)
-3b143cc283b7f707 B-01 Tactical (Style 2)
-f4880623d32bafa9 B-01 Tactical (Style 3)
-8313c9a556b8ee85 B-01 Tactical (Style 4)
+fd109bfeeed36726 B-01 Tactical (Variation 1)
+3b143cc283b7f707 B-01 Tactical (Variation 2)
+f4880623d32bafa9 B-01 Tactical (Variation 3)
+8313c9a556b8ee85 B-01 Tactical (Variation 4)
 5828025300024f4f CM-09 Bonesnapper
 453c6def93940335 FS-05 Marksman
 98da89d0d5132867 FS-23 Battle Master
@@ -20,3 +20,8 @@ e9f7da425997f38b CW-22 Kodiak
 0290d8011fce62ef FS-38 Eradicator
 5e9a360985f0a6e0 TR-117 Alpha Commander
 7c3496a468bf0028 CM-14 Physician
+0c7ecd8156d49fe9 PH-202 Twigsnapper
+38a82f5be66c5b36 CE-27 Ground Breaker
+5c82005edd85558c PH-56 Jaguar
+c0b7d29585edde5a CE-101 Guerilla Gorilla
+f0daae91a2027fd7 PH-9 Predator

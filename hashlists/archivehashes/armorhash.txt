@@ -1,7 +1,7 @@
-4ceb3d4e31097c68 B-01 Tactical (Style 1)
-562a45e9bc984eb9 B-01 Tactical (Style 2)
-6cd3d55c05d4eac1 B-01 Tactical (Style 3)
-519cc1ec2eb56e1d B-01 Tactical (Style 4)
+4ceb3d4e31097c68 B-01 Tactical (Variation 1)
+562a45e9bc984eb9 B-01 Tactical (Variation 2)
+6cd3d55c05d4eac1 B-01 Tactical (Variation 3)
+519cc1ec2eb56e1d B-01 Tactical (Variation 4)
 58e4bd4b2278d15c TR-7 Ambassador of the Brand
 2d25ef67b7d87ea3 CM-09 Bonesnapper
 31d06451a09679f1 FS-05 Marksman
@@ -22,3 +22,18 @@ ffcad1f7ff9888d7 CE-07 Demolition Specialist
 d1421b2988398f0a TBDSA-32 Dynamo
 aade1a73a16b5fb5 SA-25 Steel Trooper
 dfa7c28c3b490a8c B-08 Light Gunner
+1866f762c49358ea B-24 Enforcer
+33cecc4e485ea3c4 B-24 Enforcer
+788df19150915809 B-24 Enforcer
+24abba68248f7adf FS-11 Executioner
+40faf112f20318ea PH-9 Predator
+68ac37dae3b424c1 FS-61 Dreadnought
+726edbdd8808874b CE-101 Guerilla Gorilla
+78c4f1839dea282d CW-9 White Wolf
+aac562a77d283684 PH-202 Twigsnapper
+a88115eeba44ec4e CE-27 Ground Breaker
+d8cd425483086455 PH-56 Jaguar
+c72998936b1d88a2 SC-37 Legionnaire
+d5f85cb5efb44cd2 SC-37 Legionnaire
+dd3c12b413651958 SC-37 Legionnaire
+f1175472a3f1469a CE-64 Grenadier

@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 6, 1),
+    "version": (1, 6, 2),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -2670,6 +2670,7 @@ class BulkLoadOperator(Operator, ImportHelper):
         Global_TocManager.BulkLoad(entryList)
         numArchives = len(Global_TocManager.LoadedArchives) - numArchives
         numSkipped = numEntries - numArchives
+        PrettyPrint(f"Loaded {numArchives} Archives. Skipped {numSkipped} Archives")
         self.report({'INFO'}, f"Loaded {numArchives} Archives. Skipped {numSkipped} Archives")
         return{'FINISHED'}
 
