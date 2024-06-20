@@ -1,6 +1,5 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 6, 2),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -982,6 +981,7 @@ class TocManager():
             else:
                 self.LoadedArchives.append(toc)
                 self.ActiveArchive = toc
+                bpy.context.scene.Hd2ToolPanelSettings.LoadedArchives = archiveID
         elif SetActive and IsPatch:
             self.Patches.append(toc)
             self.ActivePatch = toc
@@ -2662,16 +2662,22 @@ class BulkLoadOperator(Operator, ImportHelper):
     def execute(self, context):
         self.file = self.filepath
         f = open(self.file, "r")
-        entryList = f.read().splitlines()
-        numEntries = len(entryList)
+        entries = f.read().splitlines()
+        numEntries = len(entries)
         PrettyPrint(f"Loading {numEntries} Archives")
         numArchives = len(Global_TocManager.LoadedArchives)
-        entryList = (Global_gamepath + entry for entry in entryList)
+        entryList = (Global_gamepath + entry for entry in entries)
         Global_TocManager.BulkLoad(entryList)
         numArchives = len(Global_TocManager.LoadedArchives) - numArchives
         numSkipped = numEntries - numArchives
         PrettyPrint(f"Loaded {numArchives} Archives. Skipped {numSkipped} Archives")
-        self.report({'INFO'}, f"Loaded {numArchives} Archives. Skipped {numSkipped} Archives")
+        PrettyPrint(f"{len(entries)} {entries}")
+        archivesList = (archive.Name for archive in Global_TocManager.LoadedArchives)
+        for item in archivesList:
+            if item in entries:
+                PrettyPrint(f"Switching To First Loaded Archive: {item}")
+                bpy.context.scene.Hd2ToolPanelSettings.LoadedArchives = item
+                break
         return{'FINISHED'}
 
 class CreatePatchFromActiveOperator(Operator):
@@ -3780,7 +3786,14 @@ class HellDivers2ToolsPanel(Panel):
         row = layout.row()
         row.prop(scene.Hd2ToolPanelSettings, "LoadedArchives", text="Archives")
         if scene.Hd2ToolPanelSettings.EnableTools:
-            row.operator("helldiver2.next_archive", icon= 'RIGHTARROW', text="")
+            row.scale_x = 0.33
+            ArchiveNum = "0/0"
+            if Global_TocManager.ActiveArchive != None:
+                Archiveindex = Global_TocManager.LoadedArchives.index(Global_TocManager.ActiveArchive) + 1
+                Archiveslength = len(Global_TocManager.LoadedArchives)
+                ArchiveNum = f"{Archiveindex}/{Archiveslength}"
+            row.operator("helldiver2.next_archive", icon= 'RIGHTARROW', text=ArchiveNum)
+            row.scale_x = 1
         row.operator("helldiver2.archive_import", icon= 'FILEBROWSER', text= "").is_patch = False
         row = layout.row()
         if len(Global_TocManager.LoadedArchives) > 0:
