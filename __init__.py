@@ -1,5 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
+    "version": (1, 7, 0),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -546,6 +547,24 @@ def GetArchiveNameFromID(EntryID):
             return hash[1]
     return ""
 
+def GetVertexGroupsFromID(EntryID):
+    for archive in Global_TocManager.LoadedArchives:
+        for entry in archive.TocEntries:
+            for vertexObjects in entry.VertexGroups:
+                if vertexObjects[0] == EntryID:
+                    PrettyPrint(f"Found Vertex Groups {vertexObjects[1]}")
+                    return vertexObjects[1]
+    return None
+
+def GetTransformsFromID(EntryID):
+    for archive in Global_TocManager.LoadedArchives:
+        for entry in archive.TocEntries:
+            for transformObjects in entry.Transforms:
+                if transformObjects[0] == EntryID:
+                    PrettyPrint(f"Found Transforms {transformObjects[1]}")
+                    return transformObjects[1]
+    return None
+
 def GetArchiveIDFromName(Name):
     for hash in Global_ArchiveHashes:
         if hash[1] == Name:
@@ -694,6 +713,8 @@ class TocEntry:
         self.IsSelected = False
         self.MaterialTemplate = None # for determining tuple to use for labeling textures in the material editor
         self.DEV_DrawIndex = -1
+        self.VertexGroups = []
+        self.Transforms = []
     # -- Serialize TocEntry -- #
     def Serialize(self, TocFile, Index=0):
         self.FileID             = TocFile.uint64(self.FileID)
@@ -771,6 +792,30 @@ class TocEntry:
             self.LoadedData = callback(self.FileID, self.TocData, self.GpuData, self.StreamData, Reload, MakeBlendObject)
             if self.LoadedData == None: raise Exception("Archive Entry Load Failed")
             self.IsLoaded   = True
+            if self.TypeID == MeshID and not self.IsModified:
+                for object in bpy.data.objects:
+                    try:
+                        objectID = object["Z_ObjectID"]
+                        if objectID == str(self.FileID):
+                            PrettyPrint(f"Writing Vetex Groups for {object.name}")
+                            vertexNames = []
+                            for group in object.vertex_groups:
+                                vertexNames.append(group.name)
+                            newGroups = [objectID, vertexNames]
+                            if newGroups not in self.VertexGroups:
+                                self.VertexGroups.append(newGroups)
+                            PrettyPrint(self.VertexGroups)
+                            PrettyPrint(f"Writing Transforms for {object.name}")
+                            transforms = []
+                            transforms.append(object.location)
+                            transforms.append(object.rotation_euler)
+                            transforms.append(object.scale)
+                            objectTransforms = [objectID, transforms]
+                            if objectTransforms not in self.Transforms:
+                                self.Transforms.append(objectTransforms)
+                            PrettyPrint(self.Transforms)
+                    except:
+                        PrettyPrint(f"Object: {object.name} has No HD2 Properties")
         else: raise Exception("Load Callback could not be found")
     # -- Write Data -- #
     def Save(self):
@@ -2524,6 +2569,15 @@ def DuplicateIDsInScene(self):
 def IncorrectVertexGroupNaming(self):
     for obj in bpy.context.selected_objects:
         incorrectGroups = 0
+        try:
+            ID = obj["Z_ObjectID"]
+        except:
+            self.report({'ERROR'}, f"Couldn't find HD2 Properties in {obj.name}")
+            return True
+        groups = GetVertexGroupsFromID(ID)
+        if groups == None or len(groups) == 0:
+            self.report({'WARNING'}, f"No Prior Loaded Vertex Groups Found, This May be Correct")
+            return False
         if len(obj.vertex_groups) <= 0:
             self.report({'ERROR'}, f"No Vertex Groups Found for Object: {obj.name}")
             return True
@@ -2532,6 +2586,9 @@ def IncorrectVertexGroupNaming(self):
                 incorrectGroups += 1
         if incorrectGroups > 0:
             self.report({'ERROR'}, f"Found {incorrectGroups} Incorrect Vertex Group Name Scheming for Object: {obj.name}")
+            return True
+        if len(groups) != len(obj.vertex_groups):
+            self.report({'ERROR'}, f"Object: {obj.name} has a different number of vertex groups than expected")
             return True
     return False
 
@@ -2544,6 +2601,15 @@ def ObjectHasModifiers(self):
 
 def AllTransformsApplied(self):
     for obj in bpy.context.selected_objects:
+        try:
+            ID = obj["Z_ObjectID"]
+        except:
+            self.report({'ERROR'}, f"Couldn't find HD2 Properties in {obj.name}")
+            return True
+        transforms = GetTransformsFromID(ID)
+        if obj.location == transforms[0] and obj.rotation_euler == transforms[1] and obj.scale == transforms[2]:
+            PrettyPrint(f"Found Correct Transforms for Object: {obj.name}")
+            return False
         if any(obj.location) or any(obj.rotation_euler) or any(scale - 1.0 for scale in obj.scale):
             self.report({'ERROR'}, f"Object: {obj.name} has unapplied transforms")
             return True
