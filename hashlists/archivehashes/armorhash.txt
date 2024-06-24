@@ -19,7 +19,7 @@ b0db7f4f0a11debd CM-14 Physician
 ffcad1f7ff9888d7 CE-07 Demolition Specialist
 5def9553433fceda SA-04 Combat Technician
 1de000bcfe445daf SA-12 Servo Assisted
-d1421b2988398f0a TBDSA-32 Dynamo
+d1421b2988398f0a SA-32 Dynamo
 aade1a73a16b5fb5 SA-25 Steel Trooper
 dfa7c28c3b490a8c B-08 Light Gunner
 1866f762c49358ea B-24 Enforcer
