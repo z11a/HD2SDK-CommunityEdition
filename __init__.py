@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 7, 0),
+    "version": (1, 7, 1),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -2607,7 +2607,7 @@ def AllTransformsApplied(self):
             self.report({'ERROR'}, f"Couldn't find HD2 Properties in {obj.name}")
             return True
         transforms = GetTransformsFromID(ID)
-        if obj.location == transforms[0] and obj.rotation_euler == transforms[1] and obj.scale == transforms[2]:
+        if transforms != None and obj.location == transforms[0] and obj.rotation_euler == transforms[1] and obj.scale == transforms[2]:
             PrettyPrint(f"Found Correct Transforms for Object: {obj.name}")
             return False
         if any(obj.location) or any(obj.rotation_euler) or any(scale - 1.0 for scale in obj.scale):
