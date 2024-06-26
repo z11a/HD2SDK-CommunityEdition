@@ -37,3 +37,4 @@ c72998936b1d88a2 SC-37 Legionnaire
 d5f85cb5efb44cd2 SC-37 Legionnaire
 dd3c12b413651958 SC-37 Legionnaire
 f1175472a3f1469a CE-64 Grenadier
+7b19ad7f21d347b4 CW-36 Winter Warrior
