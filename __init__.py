@@ -3127,7 +3127,9 @@ class SaveStingrayMeshOperator(Operator):
                         self.report({'ERROR'}, f"Archive for entry being saved is not loaded. Object: {object.name} ID: {ID}")
                         return{'CANCELLED'}
                     except:
-                        self.report({'ERROR'}, f"Failed to find object with custom property ID")
+                        self.report({'ERROR'}, f"Failed to find object with custom property ID. Object: {object.name}")
+                        return{'CANCELLED'}
+        self.report({'INFO'}, f"Saved Mesh: {object.name}")
         return{'FINISHED'}
 
 class BatchSaveStingrayMeshOperator(Operator):
@@ -3144,14 +3146,12 @@ class BatchSaveStingrayMeshOperator(Operator):
         if len(objects) == 0:
             self.report({'WARNING'}, "No Objects Selected")
         bpy.ops.object.select_all(action='DESELECT')
-        HD2Objects = []
         IDs = []
         for object in objects:
             try:
                 ID = object["Z_ObjectID"]
                 if ID not in IDs:
                     IDs.append(ID)
-                    #HD2Objects.append(ID, object.name)
             except:
                 self.report({'ERROR'}, f"{object.name} has no HD2 custom properties")
                 return{'CANCELLED'}
@@ -3170,7 +3170,9 @@ class BatchSaveStingrayMeshOperator(Operator):
                             return{'CANCELLED'}
                     except:
                         PrettyPrint(f"Couldn't find Object: {object.name} at ID: {ID}")
-                self.report({'ERROR'}, f"Archive for entry being saved is not loaded. Could not find custom property object at ID: {ID} B")
+                self.report({'ERROR'}, f"Archive for entry being saved is not loaded. Could not find custom property object at ID: {ID}")
+                return{'CANCELLED'}
+        self.report({'INFO'}, f"Saved {len(objects)} Meshes")
         return{'FINISHED'}
 
 #endregion
