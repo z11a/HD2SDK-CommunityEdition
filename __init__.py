@@ -273,6 +273,9 @@ def GetMeshData(og_object):
     if mesh.vertex_colors:
         color_layer = mesh.vertex_colors.active
         for face in object.data.polygons:
+            if color_layer == None: 
+                PrettyPrint(f"{og_object.name} Color Layer does not exist", 'ERROR')
+                break
             for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
                 col = color_layer.data[loop_idx].color
                 colors[vert_idx] = [col[0], col[1], col[2], col[3]]
