@@ -2622,6 +2622,9 @@ def MaterialsNumberNames(self):
     mesh_objs = [ob for ob in bpy.context.selected_objects if ob.type == 'MESH']
     for mesh in mesh_objs:
         invalidMaterials = 0
+        if len(mesh.material_slots) == 0:
+            self.report({'ERROR'}, f"Object: {mesh.name} has no material slots")
+            return True
         for slot in mesh.material_slots:
             if slot.material:
                 if not slot.material.name.isnumeric():
