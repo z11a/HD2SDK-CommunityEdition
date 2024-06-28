@@ -18,8 +18,8 @@ Community Edition aims to bring quality of life features to the Helldivers 2 Mod
 - **Bulk Scene Importing** for using a text file to import many archives at once
 - And **Much More!**
 
-### Planned
-- **Better Friendly Names** for ability to automatically be generated and to be removed
+#### [Check Out Our Trello Board](https://trello.com/b/8RLH5nq6/helldivers-2-sdk-community-edition)
+ 
 
 ### What About the Original Tool?
 The developers of the original version of the tool have stated that they are unlikely to update it. Therefore, this community version of it has been made to bring quality of life features and to fix issues with the base version of the tool.
