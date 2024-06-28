@@ -18,7 +18,7 @@ Community Edition aims to bring quality of life features to the Helldivers 2 Mod
 - **Bulk Scene Importing** for using a text file to import many archives at once
 - And **Much More!**
 
-#### [Check Out Our Trello Board](https://trello.com/b/8RLH5nq6/helldivers-2-sdk-community-edition)
+#### [Check Out Our Trello Board!](https://trello.com/b/8RLH5nq6/helldivers-2-sdk-community-edition)
  
 
 ### What About the Original Tool?
