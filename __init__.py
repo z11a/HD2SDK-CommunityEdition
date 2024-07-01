@@ -3715,6 +3715,23 @@ class CopyArchiveIDOperator(Operator):
 
         return {'FINISHED'}
 
+class EntrySectionOperator(Operator):
+    bl_label = "Collapse Section"
+    bl_idname = "helldiver2.collapse_section"
+    bl_description = "Fold Current Section"
+
+    type: StringProperty(default = "")
+
+    def execute(self, context):
+        if self.type == "mesh":
+            bpy.context.scene.Hd2ToolPanelSettings.ShowMeshes = not bpy.context.scene.Hd2ToolPanelSettings.ShowMeshes
+        elif self.type == "texture":
+            bpy.context.scene.Hd2ToolPanelSettings.ShowTextures = not bpy.context.scene.Hd2ToolPanelSettings.ShowTextures
+        elif self.type == "material":
+            bpy.context.scene.Hd2ToolPanelSettings.ShowMaterials = not bpy.context.scene.Hd2ToolPanelSettings.ShowMaterials
+        else:
+            bpy.context.scene.Hd2ToolPanelSettings.ShowOthers = not bpy.context.scene.Hd2ToolPanelSettings.ShowOthers
+        return {'FINISHED'}
 #endregion
 
 #region Menus and Panels
@@ -3821,9 +3838,6 @@ class HellDivers2ToolsPanel(Panel):
         
         if scene.Hd2ToolPanelSettings.MenuExpanded:
             row = layout.row(); row.separator(); row.label(text="Display Types"); box = row.box(); row = box.grid_flow(columns=1)
-            row.prop(scene.Hd2ToolPanelSettings, "ShowMeshes")
-            row.prop(scene.Hd2ToolPanelSettings, "ShowTextures")
-            row.prop(scene.Hd2ToolPanelSettings, "ShowMaterials")
             row.prop(scene.Hd2ToolPanelSettings, "ShowOthers")
             row = layout.row(); row.separator(); row.label(text="Import Options"); box = row.box(); row = box.grid_flow(columns=1)
             row.prop(scene.Hd2ToolPanelSettings, "ImportMaterials")
@@ -3936,16 +3950,22 @@ class HellDivers2ToolsPanel(Panel):
 
                 # Get Type Icon
                 type_icon = 'FILE'
+                show = True
+                EntryNum = 0
                 if Type.TypeID == MeshID:
+                    show = scene.Hd2ToolPanelSettings.ShowMeshes
                     type_icon = 'FILE_3D'
-                    if not scene.Hd2ToolPanelSettings.ShowMeshes: continue
                 elif Type.TypeID == TexID:
+                    show = scene.Hd2ToolPanelSettings.ShowTextures
                     type_icon = 'FILE_IMAGE'
-                    if not scene.Hd2ToolPanelSettings.ShowTextures: continue
                 elif Type.TypeID == MaterialID:
+                    show = scene.Hd2ToolPanelSettings.ShowMaterials
                     type_icon = 'MATERIAL'
-                    if not scene.Hd2ToolPanelSettings.ShowMaterials: continue
-                elif not scene.Hd2ToolPanelSettings.ShowOthers: continue
+                else:
+                    show = scene.Hd2ToolPanelSettings.ShowOthers
+                    if not show: continue
+
+                fold_icon = "DOWNARROW_HLT" if show else "RIGHTARROW"
 
                 # Draw Type Header
                 box = layout.box(); row = box.row()
@@ -3953,7 +3973,10 @@ class HellDivers2ToolsPanel(Panel):
                 split = row.split()
                 
                 sub = split.row(align=True)
-                sub.label(text=typeName+": "+str(Type.TypeID), icon=type_icon)
+                sub.operator("helldiver2.collapse_section", text=f"{typeName}: {str(Type.TypeID)}", icon=fold_icon, emboss=False).type = typeName
+
+                # Skip drawling entries if section hidden
+                if not show: continue
                 
                 #sub.operator("helldiver2.import_type", icon='IMPORT', text="").object_typeid = str(Type.TypeID)
                 sub.operator("helldiver2.select_type", icon='RESTRICT_SELECT_OFF', text="").object_typeid = str(Type.TypeID)
@@ -4181,6 +4204,7 @@ classes = (
     RenamePatchOperator,
     NextArchiveOperator,
     MaterialTextureEntryOperator,
+    EntrySectionOperator,
 )
 
 Global_TocManager = TocManager()
