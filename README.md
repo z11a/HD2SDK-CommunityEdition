@@ -38,7 +38,7 @@ We've taken the time to write a tutorial focused on armor modding which should a
 - [Early Youtube Tutorial for Models](https://youtu.be/jdz-JeLvCY4)
 
 ### Discords
-- [Community Discord](https://discord.gg/Nzdc7z8Awr) for support with **Community Edition**. Ping @khameli0n for access to Modder Channels
+- [Community Discord](https://discord.gg/ZwjPaZNwH7) for support with **Community Edition**
 - [Toasted Discord](https://discord.gg/ftSZppf) for the original addon creators
 
 
