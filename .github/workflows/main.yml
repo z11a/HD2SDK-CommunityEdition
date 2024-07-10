@@ -33,11 +33,3 @@ jobs:
           name: "${{env.PROJECT_NAME}}"
           tag: latest
           allowUpdates: true
-      - name: Github Releases To Discord
-        uses: SethCohen/github-releases-to-discord@v1.15.0
-        with:
-          webhook_url: ${{ secrets.WEBHOOK_URL }}
-          username: "Release Changelog"
-          content: "||<@1260291608646127706>||"
-          footer_title: "Changelog"
-          footer_timestamp: true
