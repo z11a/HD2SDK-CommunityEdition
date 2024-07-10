@@ -45,4 +45,4 @@ We've taken the time to write a tutorial focused on armor modding which should a
 
 ## Credits
 - Toasted modding team for making the [original version](https://github.com/kboykboy2/io_scene_helldivers2)
-- Boxofbiscuits97 for making this community version.
+- Boxofbiscuits97 for making this community version
