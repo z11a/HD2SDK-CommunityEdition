@@ -67,6 +67,7 @@ BoneID  = 1792059921637536489
 WwiseBankID = 6006249203084351385
 WwiseDepID  = 12624162998411505776
 WwiseStreamID  = 5785811756662211598
+WwiseMetaDataID  = 15351235653606224144
 
 TextureTypeLookup = {
     "original": (
@@ -3741,6 +3742,8 @@ class EntrySectionOperator(Operator):
             bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseDep = not bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseDep
         elif self.type == str(WwiseStreamID):
             bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseStream = not bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseStream
+        elif self.type == str(WwiseMetaDataID):
+            bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseMetaData = not bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseMetaData
         else:
             bpy.context.scene.Hd2ToolPanelSettings.ShowOthers = not bpy.context.scene.Hd2ToolPanelSettings.ShowOthers
         return {'FINISHED'}
@@ -3771,6 +3774,7 @@ class Hd2ToolPanelSettings(PropertyGroup):
     ShowWwiseBank    : BoolProperty(name="Wwise Bank", description = "Show WwiseBank", default = False)
     ShowWwiseDep     : BoolProperty(name="Wwise Dep", description = "Show WwiseDep", default = False)
     ShowWwiseStream  : BoolProperty(name="Wwise Stream", description = "Show WwiseStream", default = False)
+    ShowWwiseMetaData:  BoolProperty(name="Wwise MetaData", description = "Show WwiseMetaData", default = False)
 
     ShowExtras       : BoolProperty(name="Extra", description = "Show Extras", default = False)
     ShowOthers       : BoolProperty(name="Other", description = "Show All Else", default = False)
@@ -3997,6 +4001,10 @@ class HellDivers2ToolsPanel(Panel):
                     if not showExtras: continue
                 elif Type.TypeID == WwiseStreamID:
                     show = scene.Hd2ToolPanelSettings.ShowWwiseStream
+                    type_icon = 'OUTLINER_DATA_SPEAKER'
+                    if not showExtras: continue
+                elif Type.TypeID == WwiseMetaDataID:
+                    show = scene.Hd2ToolPanelSettings.ShowWwiseMetaData
                     type_icon = 'OUTLINER_DATA_SPEAKER'
                     if not showExtras: continue
                 else:
