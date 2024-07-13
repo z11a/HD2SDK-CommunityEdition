@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 8, 0),
+    "version": (1, 8, 1),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -63,6 +63,10 @@ CompositeMeshID = 14191111524867688662
 MeshID = 16187218042980615487
 TexID  = 14790446551990181426
 MaterialID  = 16915718763308572383
+BoneID  = 1792059921637536489
+WwiseBankID = 6006249203084351385
+WwiseDepID  = 12624162998411505776
+WwiseStreamID  = 5785811756662211598
 
 TextureTypeLookup = {
     "original": (
@@ -3723,12 +3727,20 @@ class EntrySectionOperator(Operator):
     type: StringProperty(default = "")
 
     def execute(self, context):
-        if self.type == "mesh":
+        if self.type == str(MeshID):
             bpy.context.scene.Hd2ToolPanelSettings.ShowMeshes = not bpy.context.scene.Hd2ToolPanelSettings.ShowMeshes
-        elif self.type == "texture":
+        elif self.type == str(TexID):
             bpy.context.scene.Hd2ToolPanelSettings.ShowTextures = not bpy.context.scene.Hd2ToolPanelSettings.ShowTextures
-        elif self.type == "material":
+        elif self.type == str(MaterialID):
             bpy.context.scene.Hd2ToolPanelSettings.ShowMaterials = not bpy.context.scene.Hd2ToolPanelSettings.ShowMaterials
+        elif self.type == str(BoneID):
+            bpy.context.scene.Hd2ToolPanelSettings.ShowBones = not bpy.context.scene.Hd2ToolPanelSettings.ShowBones
+        elif self.type == str(WwiseBankID):
+            bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseBank = not bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseBank
+        elif self.type == str(WwiseDepID):
+            bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseDep = not bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseDep
+        elif self.type == str(WwiseStreamID):
+            bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseStream = not bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseStream
         else:
             bpy.context.scene.Hd2ToolPanelSettings.ShowOthers = not bpy.context.scene.Hd2ToolPanelSettings.ShowOthers
         return {'FINISHED'}
@@ -3754,7 +3766,15 @@ class Hd2ToolPanelSettings(PropertyGroup):
     ShowMeshes       : BoolProperty(name="Meshes", description = "Show Meshes", default = True)
     ShowTextures     : BoolProperty(name="Textures", description = "Show Textures", default = True)
     ShowMaterials    : BoolProperty(name="Materials", description = "Show Materials", default = True)
+
+    ShowBones        : BoolProperty(name="Bones", description = "Show Bones", default = False)
+    ShowWwiseBank    : BoolProperty(name="Wwise Bank", description = "Show WwiseBank", default = False)
+    ShowWwiseDep     : BoolProperty(name="Wwise Dep", description = "Show WwiseDep", default = False)
+    ShowWwiseStream  : BoolProperty(name="Wwise Stream", description = "Show WwiseStream", default = False)
+
+    ShowExtras       : BoolProperty(name="Extra", description = "Show Extras", default = False)
     ShowOthers       : BoolProperty(name="Other", description = "Show All Else", default = False)
+
     ImportMaterials  : BoolProperty(name="Import Materials", description = "Fully import materials by appending the textures utilized, otherwise create placeholders", default = True)
     ImportLods       : BoolProperty(name="Import LODs", description = "Import LODs", default = False)
     ImportGroup0     : BoolProperty(name="Import Group 0 Only", description = "Only import the first vertex group, ignore others", default = True)
@@ -3838,6 +3858,7 @@ class HellDivers2ToolsPanel(Panel):
         
         if scene.Hd2ToolPanelSettings.MenuExpanded:
             row = layout.row(); row.separator(); row.label(text="Display Types"); box = row.box(); row = box.grid_flow(columns=1)
+            row.prop(scene.Hd2ToolPanelSettings, "ShowExtras")
             row.prop(scene.Hd2ToolPanelSettings, "ShowOthers")
             row = layout.row(); row.separator(); row.label(text="Import Options"); box = row.box(); row = box.grid_flow(columns=1)
             row.prop(scene.Hd2ToolPanelSettings, "ImportMaterials")
@@ -3951,6 +3972,7 @@ class HellDivers2ToolsPanel(Panel):
                 # Get Type Icon
                 type_icon = 'FILE'
                 show = True
+                showExtras = scene.Hd2ToolPanelSettings.ShowExtras
                 EntryNum = 0
                 if Type.TypeID == MeshID:
                     show = scene.Hd2ToolPanelSettings.ShowMeshes
@@ -3961,6 +3983,22 @@ class HellDivers2ToolsPanel(Panel):
                 elif Type.TypeID == MaterialID:
                     show = scene.Hd2ToolPanelSettings.ShowMaterials
                     type_icon = 'MATERIAL'
+                elif Type.TypeID == BoneID:
+                    show = scene.Hd2ToolPanelSettings.ShowBones
+                    type_icon = 'BONE_DATA'
+                    if not showExtras: continue
+                elif Type.TypeID == WwiseBankID:
+                    show = scene.Hd2ToolPanelSettings.ShowWwiseBank
+                    type_icon = 'OUTLINER_DATA_SPEAKER'
+                    if not showExtras: continue
+                elif Type.TypeID == WwiseDepID:
+                    show = scene.Hd2ToolPanelSettings.ShowWwiseDep
+                    type_icon = 'OUTLINER_DATA_SPEAKER'
+                    if not showExtras: continue
+                elif Type.TypeID == WwiseStreamID:
+                    show = scene.Hd2ToolPanelSettings.ShowWwiseStream
+                    type_icon = 'OUTLINER_DATA_SPEAKER'
+                    if not showExtras: continue
                 else:
                     show = scene.Hd2ToolPanelSettings.ShowOthers
                     if not show: continue
@@ -3973,7 +4011,7 @@ class HellDivers2ToolsPanel(Panel):
                 split = row.split()
                 
                 sub = split.row(align=True)
-                sub.operator("helldiver2.collapse_section", text=f"{typeName}: {str(Type.TypeID)}", icon=fold_icon, emboss=False).type = typeName
+                sub.operator("helldiver2.collapse_section", text=f"{typeName}: {str(Type.TypeID)}", icon=fold_icon, emboss=False).type = str(Type.TypeID)
 
                 # Skip drawling entries if section hidden
                 if not show: continue
