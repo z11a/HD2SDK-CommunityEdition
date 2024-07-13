@@ -4276,17 +4276,6 @@ def unregister():
         bpy.utils.unregister_class(cls)
     bpy.types.VIEW3D_MT_object_context_menu.remove(CustomPropertyContext)
 
-    if Global_CPPHelper:
-    # Get the module handle
-        module_handle = ctypes.c_ulong()
-        ctypes.windll.kernel32.GetModuleHandleA(Global_dllpath.encode(), ctypes.byref(module_handle))
-        
-        # Free the module
-        ctypes.windll.kernel32.FreeLibrary(module_handle.value)
-        PrettyPrint(f"Unloaded {Global_dllpath}")
-    else:
-        PrettyPrint("No DLL to unload.", 'Error')
-
 
 if __name__=="__main__":
     register()
