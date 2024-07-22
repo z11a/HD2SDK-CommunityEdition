@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 8, 1),
+    "version": (1, 8, 2),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -555,22 +555,22 @@ def GetArchiveNameFromID(EntryID):
             return hash[1]
     return ""
 
-def GetVertexGroupsFromID(EntryID):
+def GetVertexGroupsFromID(EntryID, InfoIndex):
     for archive in Global_TocManager.LoadedArchives:
         for entry in archive.TocEntries:
             for vertexObjects in entry.VertexGroups:
-                if vertexObjects[0] == EntryID:
-                    PrettyPrint(f"Found Vertex Groups {vertexObjects[1]}")
-                    return vertexObjects[1]
+                if vertexObjects[0] == EntryID and vertexObjects[1] == InfoIndex:
+                    PrettyPrint(f"Found Vertex Groups {vertexObjects[2]}")
+                    return vertexObjects[2]
     return None
 
-def GetTransformsFromID(EntryID):
+def GetTransformsFromID(EntryID, InfoIndex):
     for archive in Global_TocManager.LoadedArchives:
         for entry in archive.TocEntries:
             for transformObjects in entry.Transforms:
-                if transformObjects[0] == EntryID:
-                    PrettyPrint(f"Found Transforms {transformObjects[1]}")
-                    return transformObjects[1]
+                if transformObjects[0] == EntryID and transformObjects[1] == InfoIndex:
+                    PrettyPrint(f"Found Transforms {transformObjects[2]}")
+                    return transformObjects[2]
     return None
 
 def GetArchiveIDFromName(Name):
@@ -804,12 +804,13 @@ class TocEntry:
                 for object in bpy.data.objects:
                     try:
                         objectID = object["Z_ObjectID"]
+                        infoIndex = object["MeshInfoIndex"]
                         if objectID == str(self.FileID):
-                            PrettyPrint(f"Writing Vetex Groups for {object.name}")
+                            PrettyPrint(f"Writing Vertex Groups for {object.name}")
                             vertexNames = []
                             for group in object.vertex_groups:
                                 vertexNames.append(group.name)
-                            newGroups = [objectID, vertexNames]
+                            newGroups = [objectID, infoIndex, vertexNames]
                             if newGroups not in self.VertexGroups:
                                 self.VertexGroups.append(newGroups)
                             PrettyPrint(self.VertexGroups)
@@ -818,7 +819,7 @@ class TocEntry:
                             transforms.append(object.location)
                             transforms.append(object.rotation_euler)
                             transforms.append(object.scale)
-                            objectTransforms = [objectID, transforms]
+                            objectTransforms = [objectID, infoIndex, transforms]
                             if objectTransforms not in self.Transforms:
                                 self.Transforms.append(objectTransforms)
                             PrettyPrint(self.Transforms)
@@ -1450,7 +1451,7 @@ def LoadStingrayTexture(ID, TocData, GpuData, StreamData, Reload, MakeBlendObjec
         with open(dds_path, 'w+b') as f:
             f.write(dds)
         
-        subprocess.run([Global_texconvpath, "-y", "-o", tempdir, "-ft", "tga", "-f", "R8G8B8A8_UNORM", dds_path], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        subprocess.run([Global_texconvpath, "-y", "-o", tempdir, "-ft", "png", "-f", "R8G8B8A8_UNORM", dds_path], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
         if os.path.isfile(tga_path):
             image = bpy.data.images.load(tga_path)
@@ -2565,13 +2566,14 @@ def DuplicateIDsInScene(self):
         if len(obj.keys()) > 1: 
             for key in obj.keys():
                 if key == "Z_ObjectID":
-                    PrettyPrint(f"obj {obj} id {obj[key]}")
+                    indexKey = "MeshInfoIndex"
+                    PrettyPrint(f"obj: {obj.name} id: {obj[key]} index: {obj[indexKey]}")
                     for otherObject in CustomObjects:
-                        if obj[key] == otherObject[0]:
+                        if obj[key] == otherObject[0] and obj[indexKey] == otherObject[1]:
                             PrettyPrint(f"found {obj}")
-                            self.report({'ERROR'}, f"Multiple objects with the same HD2 properties are in the scene! Please delete one and try again.\nObjects:{otherObject[1]}, {obj.name}")
+                            self.report({'ERROR'}, f"Multiple objects with the same HD2 properties are in the scene! Please delete one and try again.\nObjects:{otherObject[2]}, {obj.name}")
                             return True
-                    CustomObjects.append([obj[key], obj.name])
+                    CustomObjects.append([obj[key], obj[indexKey], obj.name])
     return False
 
 def IncorrectVertexGroupNaming(self):
@@ -2579,10 +2581,11 @@ def IncorrectVertexGroupNaming(self):
         incorrectGroups = 0
         try:
             ID = obj["Z_ObjectID"]
+            InfoIndex = obj["MeshInfoIndex"]
         except:
             self.report({'ERROR'}, f"Couldn't find HD2 Properties in {obj.name}")
             return True
-        groups = GetVertexGroupsFromID(ID)
+        groups = GetVertexGroupsFromID(ID, InfoIndex)
         if groups == None or len(groups) == 0:
             self.report({'WARNING'}, f"No Prior Loaded Vertex Groups Found, This May be Correct")
             return False
@@ -2590,7 +2593,7 @@ def IncorrectVertexGroupNaming(self):
             self.report({'ERROR'}, f"No Vertex Groups Found for Object: {obj.name}")
             return True
         for group in obj.vertex_groups:
-            if not group.name.startswith("0_"):
+            if "_" not in group.name:
                 incorrectGroups += 1
         if incorrectGroups > 0:
             self.report({'ERROR'}, f"Found {incorrectGroups} Incorrect Vertex Group Name Scheming for Object: {obj.name}")
@@ -2611,10 +2614,11 @@ def AllTransformsApplied(self):
     for obj in bpy.context.selected_objects:
         try:
             ID = obj["Z_ObjectID"]
+            InfoIndex = obj["MeshInfoIndex"]
         except:
             self.report({'ERROR'}, f"Couldn't find HD2 Properties in {obj.name}")
             return True
-        transforms = GetTransformsFromID(ID)
+        transforms = GetTransformsFromID(ID, InfoIndex)
         if transforms != None and obj.location == transforms[0] and obj.rotation_euler == transforms[1] and obj.scale == transforms[2]:
             PrettyPrint(f"Found Correct Transforms for Object: {obj.name}")
             return False
