@@ -1446,19 +1446,19 @@ def LoadStingrayTexture(ID, TocData, GpuData, StreamData, Reload, MakeBlendObjec
     if MakeBlendObject and not (exists and not Reload):
         tempdir = tempfile.gettempdir()
         dds_path = f"{tempdir}\\{ID}.dds"
-        tga_path = f"{tempdir}\\{ID}.tga"
+        png_path = f"{tempdir}\\{ID}.png"
 
         with open(dds_path, 'w+b') as f:
             f.write(dds)
         
         subprocess.run([Global_texconvpath, "-y", "-o", tempdir, "-ft", "png", "-f", "R8G8B8A8_UNORM", dds_path], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
-        if os.path.isfile(tga_path):
-            image = bpy.data.images.load(tga_path)
+        if os.path.isfile(png_path):
+            image = bpy.data.images.load(png_path)
             image.name = str(ID)
             image.pack()
         else:
-            raise Exception(f"Failed to convert texture {ID} to TGA, or DDS failed to export")
+            raise Exception(f"Failed to convert texture {ID} to PNG, or DDS failed to export")
     
     return StingrayTex
 
@@ -3285,10 +3285,11 @@ class BatchExportTextureOperator(Operator):
 
 # import texture from archive button
 class SaveTextureFromDDSOperator(Operator, ImportHelper):
-    bl_label = "Save Texture"
+    bl_label = "Import DDS"
     bl_idname = "helldiver2.texture_savefromdds"
     bl_description = "Override Current Texture with a Selected DDS File"
 
+    filter_glob: StringProperty(default='*.dds', options={'HIDDEN'})
     object_id: StringProperty(options={"HIDDEN"})
     def execute(self, context):
         if PatchesNotLoaded(self):
@@ -3300,6 +3301,48 @@ class SaveTextureFromDDSOperator(Operator, ImportHelper):
                 Entry.Load()
                 StingrayTex = Entry.LoadedData
                 with open(self.filepath, 'r+b') as f:
+                    StingrayTex.FromDDS(f.read())
+                Toc = MemoryStream(IOMode="write")
+                Gpu = MemoryStream(IOMode="write")
+                Stream = MemoryStream(IOMode="write")
+                StingrayTex.Serialize(Toc, Gpu, Stream)
+                # add texture to entry
+                Entry.SetData(Toc.Data, Gpu.Data, Stream.Data, False)
+
+                Global_TocManager.Save(int(self.object_id), TexID)
+        
+        # Redraw
+        for area in context.screen.areas:
+            if area.type == "VIEW_3D": area.tag_redraw()
+
+        return{'FINISHED'}
+
+
+class SaveTextureFromPNGOperator(Operator, ImportHelper):
+    bl_label = "Import PNG"
+    bl_idname = "helldiver2.texture_savefrompng"
+    bl_description = "Override Current Texture with a Selected PNG File"
+
+    filter_glob: StringProperty(default='*.png', options={'HIDDEN'})
+    object_id: StringProperty(options={"HIDDEN"})
+    def execute(self, context):
+        if PatchesNotLoaded(self):
+            return {'CANCELLED'}
+        Entry = Global_TocManager.GetEntry(int(self.object_id), TexID)
+        if Entry != None:
+            if len(self.filepath) > 1:
+                # get texture data
+                Entry.Load()
+                StingrayTex = Entry.LoadedData
+                tempdir = tempfile.gettempdir()
+                PrettyPrint(self.filepath)
+                PrettyPrint(StingrayTex.Format)
+                subprocess.run([Global_texconvpath, "-y", "-o", tempdir, "-ft", "dds", "-dx10", "-f", StingrayTex.Format, self.filepath], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+                nameIndex = self.filepath.rfind("\.".strip(".")) + 1
+                fileName = self.filepath[nameIndex:]
+                dds_path = f"{tempdir}\\{fileName}"
+                PrettyPrint(dds_path)
+                with open(dds_path, 'r+b') as f:
                     StingrayTex.FromDDS(f.read())
                 Toc = MemoryStream(IOMode="write")
                 Gpu = MemoryStream(IOMode="write")
@@ -4172,6 +4215,7 @@ class WM_MT_button_context(Menu):
             row.operator("helldiver2.texture_saveblendimage", icon='FILE_BLEND', text=SaveTextureName).object_id = FileIDStr
             if SingleEntry:
                 row.operator("helldiver2.texture_savefromdds", icon='IMAGE_REFERENCE', text="Import DDS").object_id = str(Entry.FileID)
+                row.operator("helldiver2.texture_savefrompng", icon='IMAGE_REFERENCE', text="Import PNG").object_id = str(Entry.FileID)
         elif AreAllMaterials:
             row.operator("helldiver2.material_save", icon='FILE_BLEND', text=SaveMaterialName).object_id = FileIDStr
         # Draw copy ID buttons
@@ -4255,6 +4299,7 @@ classes = (
     NextArchiveOperator,
     MaterialTextureEntryOperator,
     EntrySectionOperator,
+    SaveTextureFromPNGOperator,
 )
 
 Global_TocManager = TocManager()
