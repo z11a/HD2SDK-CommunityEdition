@@ -2368,7 +2368,10 @@ class StingrayMeshFile:
 
                     # Get Bone Indices
                     elif type == "bone_index":
-                        mesh.VertexBoneIndices[Component.Index][vidx] = Component.SerializeComponent(gpu, mesh.VertexBoneIndices[Component.Index][vidx])
+                        try:
+                            mesh.VertexBoneIndices[Component.Index][vidx] = Component.SerializeComponent(gpu, mesh.VertexBoneIndices[Component.Index][vidx])
+                        except:
+                            raise Exception(f"Vertex bone index out of range. Component index: {Component.Index} vidx: {vidx}")
 
                     # Get Weights
                     elif type == "bone_weight":
