@@ -1413,6 +1413,11 @@ class StingrayTexture:
     
     def ParseDDSHeader(self):
         dds = MemoryStream(self.ddsHeader, IOMode="read")
+        dds.seek(84)
+        Header = dds.read(4)
+        DX10Header = b"DX10"
+        if Header != DX10Header:
+            raise Exception(f"DDS must use dx10 extended header. Got: {Header}")
         dds.seek(12)
         self.Height = dds.uint32(0)
         self.Width  = dds.uint32(0)
