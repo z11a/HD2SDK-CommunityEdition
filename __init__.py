@@ -1332,7 +1332,7 @@ def AddMaterialToBlend(ID, StringrayMat, EmptyMatExists=False):
 
     mat.diffuse_color = (r.random(), r.random(), r.random(), 1)
     mat.use_nodes = True
-    bsdf = mat.node_tree.nodes["Principled BSDF"]
+    #bsdf = mat.node_tree.nodes["Principled BSDF"] # It's not even used?
     idx = 0
     for TextureID in StringrayMat.TexIDs:
         # Create Node
