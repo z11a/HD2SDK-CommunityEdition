@@ -1330,6 +1330,7 @@ def AddMaterialToBlend(ID, StringrayMat, EmptyMatExists=False):
     else:
         mat = bpy.data.materials.new(str(ID)); mat.name = str(ID)
 
+    r.seed(ID)
     mat.diffuse_color = (r.random(), r.random(), r.random(), 1)
     mat.use_nodes = True
     #bsdf = mat.node_tree.nodes["Principled BSDF"] # It's not even used?
@@ -1354,6 +1355,7 @@ def AddMaterialToBlend_EMPTY(ID):
         bpy.data.materials[str(ID)]
     except:
         mat = bpy.data.materials.new(str(ID)); mat.name = str(ID)
+        r.seed(ID)
         mat.diffuse_color = (r.random(), r.random(), r.random(), 1)
 
 #endregion
