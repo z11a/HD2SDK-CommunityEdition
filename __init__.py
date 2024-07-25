@@ -3349,7 +3349,7 @@ class SaveTextureFromPNGOperator(Operator, ImportHelper):
                 PrettyPrint(StingrayTex.Format)
                 subprocess.run([Global_texconvpath, "-y", "-o", tempdir, "-ft", "dds", "-dx10", "-f", StingrayTex.Format, self.filepath], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
                 nameIndex = self.filepath.rfind("\.".strip(".")) + 1
-                fileName = self.filepath[nameIndex:]
+                fileName = self.filepath[nameIndex:].replace(".png", ".dds")
                 dds_path = f"{tempdir}\\{fileName}"
                 PrettyPrint(dds_path)
                 with open(dds_path, 'r+b') as f:
