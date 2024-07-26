@@ -18,10 +18,32 @@ fd1028aaaa651c2f SA-25 Steel Trooper
 e4e4639f4365ca4e SA-32 Dynamo
 e9f7da425997f38b CW-22 Kodiak
 0290d8011fce62ef FS-38 Eradicator
-5e9a360985f0a6e0 TR-117 Alpha Commander
 7c3496a468bf0028 CM-14 Physician
 0c7ecd8156d49fe9 PH-202 Twigsnapper
 38a82f5be66c5b36 CE-27 Ground Breaker
 5c82005edd85558c PH-56 Jaguar
 c0b7d29585edde5a CE-101 Guerilla Gorilla
 f0daae91a2027fd7 PH-9 Predator
+67baff6f1c9a2775 FS-37 Ravager
+0121fd0e8370a1dc DP-53 Savior of the Free
+0a03573534303d12 SC-37 Legionnaire
+13f9269d08e52cf2 FS-55 Devastator
+19888141475bf282 SC-15 Drone Master
+22bb11d902251d11 CM-17 Butcher
+3a169e8ac4b9c62e EX-16 Prototype 16
+49076aae3fe24987 B-27 Fortified Commando
+5f6dbf7fbbccccdd CW-4 Arctic Ranger
+70335c90463d4368 CW-9 White Wolf
+80f8e300f67850e9 CE-74 Breaker
+92c0b2ea0ab6f69e CE-64 Grenadier
+9cfd4019e0902fa8 CW-36 Winter Warrior
+a45cfd81d5ea873b DP-11 Champion of the People
+bb58aea9beba9e0e B-24 Enforcer
+bf02ab023a9248f3 EX-00 Prototype X
+c720eb21745daa53 FS-61 Dreadnought
+ed5d869cda68286e CE-67 Titan
+fadecbde1e20ad47 CM-21 Trench Paramedic
+fcb56daa66137cb6 CM-10 Clinician
+fdd3d3e677e5a3f4 CE-07 Demolition Specialist
+ff2a9db5dfe875d3 FS-11 Executioner
+3196ede0c925ba83 SA-12 Servo-Assisted
