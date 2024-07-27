@@ -10,7 +10,7 @@ ccac0a57aca3ae92 FS-05 Marksman
 d7e0e8a6c8ab0e2c FS-05 Marksman
 9102938b4b2aef9d FS-23 Battle Master
 0bb13de574d4acce SC-34 Infiltrator
-5e0dba19a567fb99 DP-53 Saviour of the Free
+5e0dba19a567fb99 DP-53 Savior of the Free
 88ccc33c4cca4d20 CE-81 Juggernaut
 e54eaa26d836a2bf SC-30 Trailblazer Scout
 b0db7f4f0a11debd CM-14 Physician

@@ -4,10 +4,9 @@ f4880623d32bafa9 B-01 Tactical (Variation 3)
 8313c9a556b8ee85 B-01 Tactical (Variation 4)
 5828025300024f4f CM-09 Bonesnapper
 453c6def93940335 FS-05 Marksman
-98da89d0d5132867 FS-23 Battle Master
+98da89d0d5132867 FS-23 Battle Master / TR-62 Knight
 984f49b3c0542aa3 SC-34 Infiltrator
 8230afe78d703e38 CE-81 Juggernaut
-9d538582c1cd96b8 DP-40/TR-9
 b72f72e3863c1611 CE-35 Trench Engineer
 e08b7a38aa847b58 SC-30 Trailblazer Scout
 fd1028aaaa651c2f SA-25 Steel Trooper
@@ -47,3 +46,7 @@ fcb56daa66137cb6 CM-10 Clinician
 fdd3d3e677e5a3f4 CE-07 Demolition Specialist
 ff2a9db5dfe875d3 FS-11 Executioner
 3196ede0c925ba83 SA-12 Servo-Assisted
+7cec1f264535f3c8 DP-40 Hero of the Federation
+1bf281b613081b05 TR-117 Alpha Commander
+202af54b4fe5dd85 TR-7 Ambassador of the Brand
+9d538582c1cd96b8 TR-9 Cavalier of Democracy
