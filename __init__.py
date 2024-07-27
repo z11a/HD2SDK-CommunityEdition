@@ -2735,7 +2735,14 @@ class ChangeFilepathOperator(Operator, ImportHelper):
         
     def execute(self, context):
         global Global_gamepath
-        Global_gamepath = self.filepath
+        filepath = self.filepath
+        steamapps = "steamapps"
+        if steamapps in filepath:
+            filepath = f"{filepath.partition(steamapps)[0]}steamapps\common\Helldivers 2\data\ "[:-1]
+        else:
+            self.report({'ERROR'}, f"Could not find steamapps folder in filepath: {filepath}")
+            return{'CANCELLED'}
+        Global_gamepath = filepath
         UpdateConfig(Global_gamepath)
         PrettyPrint(f"Changed Game File Path: {Global_gamepath}")
         return{'FINISHED'}
