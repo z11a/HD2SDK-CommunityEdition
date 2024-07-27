@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 8, 3),
+    "version": (1, 9, 0),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -8,7 +8,7 @@ bl_info = {
 #region Imports
 
 # System
-import ctypes, os, tempfile, subprocess, time, webbrowser, shutil
+import ctypes, os, tempfile, subprocess, time, webbrowser, shutil, datetime
 import random as r
 from copy import deepcopy
 from math import ceil
@@ -51,6 +51,7 @@ Global_automatonhashpath = f"{AddonPath}\\hashlists\\archivehashes\\automatonhas
 Global_defaultgamepath   = "C:\Program Files (x86)\Steam\steamapps\common\Helldivers 2\data\ "
 Global_defaultgamepath   = Global_defaultgamepath[:len(Global_defaultgamepath) - 1]
 Global_gamepath          = ""
+Global_searchpath        = ""
 Global_configpath        = f"{AddonPath}.ini"
 
 Global_CPPHelper = ctypes.cdll.LoadLibrary(Global_dllpath) if os.path.isfile(Global_dllpath) else None
@@ -2656,11 +2657,77 @@ def MaterialsNumberNames(self):
 def MeshNotValidToSave(self):
     return PatchesNotLoaded(self) or DuplicateIDsInScene(self) or IncorrectVertexGroupNaming(self) or ObjectHasModifiers(self) or AllTransformsApplied(self) or MaterialsNumberNames(self)
 
+def hex_to_decimal(hex_string):
+    hex_string = hex_string.removeprefix("0x")
+    decimal_value = int(hex_string, 16)
+    return decimal_value
+
+def SearchByEntryID(self, file):
+    if Global_searchpath == "":
+        self.report({'ERROR'}, "Change Search Path!")
+        return{'CANCELLED'}
+    toc = StreamToc()
+    found = []
+    start_time = time.time()
+    findme = open(file, "r")
+    fileIDs = findme.read().splitlines()
+    findme.close()
+
+    directorys = os.listdir(Global_gamepath)
+    searched = 0
+    foundIDs = 0
+    totalIDs = len(fileIDs)
+    PrettyPrint(f"Searching for {len(fileIDs)} IDs in {len(directorys)} files\n\n")
+    for filename in directorys:
+        searched += 1
+        PrettyPrint(f"Searching: {filename}    File: {searched}/{len(directorys)}\r")
+        f = os.path.join(Global_gamepath, filename)
+        if not os.path.splitext(f)[1]:
+            if os.path.isfile(f):
+                toc.FromFile(f)
+                for entry in toc.TocEntries:
+                    for fileID in fileIDs:
+                        ID = fileID.split()[0]
+                        if ID.upper() != ID.lower():
+                            ID = str(hex_to_decimal(ID))
+                        if str(entry.FileID) == ID:
+                            try:
+                                name = fileID.split(" ", 1)[1]
+                            except:
+                                name = "No Name"
+                            PrettyPrint(f"\nArchive: {filename} Entry ID: {ID} Name: {name}")
+                            totaltime = time.time() - start_time
+                            hours = round(totaltime / 3600)
+                            minutes = round(totaltime / 60)
+                            seconds = round(totaltime % 60)
+                            PrettyPrint(f"Overall Time: {hours} hrs {minutes} min {seconds} sec")
+
+                            found.append(f"{filename} {name}")
+                            fileIDs.remove(fileID)
+                            foundIDs += 1
+                            PrettyPrint(f"Found {foundIDs}/{totalIDs} IDs\n")
+                            if len(fileIDs) == 0:
+                                PrettyPrint(f"Finished Searching {searched}/{len(directorys)} files")
+                                curenttime = str(datetime.datetime.now()).replace(":", "-").replace(".", "_")
+                                outputfile = f"{Global_searchpath}output_{curenttime}.txt"
+                                output = open(outputfile, "w")
+                                for item in found:
+                                    output.write(item + "\n")
+                                output.close()
+                                PrettyPrint(f"Created Output file at {outputfile}")
+                                return{'FINISHED'}
+
+    PrettyPrint(f"Could not find {len(fileIDs)} IDs", "ERROR")
+    PrettyPrint(fileIDs)
+    return{'FINISHED'}
+
 class ChangeFilepathOperator(Operator, ImportHelper):
     bl_label = "Change Filepath"
     bl_idname = "helldiver2.change_filepath"
     #filename_ext = "."
     use_filter_folder = True
+
+    filter_glob: StringProperty(options={'HIDDEN'}, default='')
 
     def __init__(self):
         global Global_gamepath
@@ -2671,6 +2738,23 @@ class ChangeFilepathOperator(Operator, ImportHelper):
         Global_gamepath = self.filepath
         UpdateConfig(Global_gamepath)
         PrettyPrint(f"Changed Game File Path: {Global_gamepath}")
+        return{'FINISHED'}
+    
+class ChangeSearchpathOperator(Operator, ImportHelper):
+    bl_label = "Change Searchpath"
+    bl_idname = "helldiver2.change_searchpath"
+    use_filter_folder = True
+
+    filter_glob: StringProperty(options={'HIDDEN'}, default='')
+
+    def __init__(self):
+        global Global_searchpath
+        self.filepath = bpy.path.abspath(Global_searchpath)
+        
+    def execute(self, context):
+        global Global_searchpath
+        Global_searchpath = self.filepath
+        PrettyPrint(f"Changed Game Search Path: {Global_searchpath}")
         return{'FINISHED'}
 
 class DefaultLoadArchiveOperator(Operator):
@@ -2770,6 +2854,16 @@ class BulkLoadOperator(Operator, ImportHelper):
                 bpy.context.scene.Hd2ToolPanelSettings.LoadedArchives = item
                 break
         return{'FINISHED'}
+
+class SearchByEntryIDOperator(Operator, ImportHelper):
+    bl_label = "Search By Entry ID"
+    bl_idname = "helldiver2.search_by_entry"
+    bl_description = "Search for Archives by their contained Entry IDs"
+
+    filter_glob: StringProperty(options={'HIDDEN'}, default='*.txt')
+
+    def execute(self, context):
+        return SearchByEntryID(self, self.filepath)
 
 class CreatePatchFromActiveOperator(Operator):
     bl_label = "Create Patch"
@@ -3942,6 +4036,10 @@ class HellDivers2ToolsPanel(Panel):
                 row.prop(scene.Hd2ToolPanelSettings, "UnloadEmptyArchives")
                 #row.prop(scene.Hd2ToolPanelSettings, "DeleteOnLoadArchive")
                 row.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
+                search = layout.row()
+                search.label(text=Global_searchpath)
+                search.operator("helldiver2.change_searchpath", icon='FILEBROWSER')
+                row.operator("helldiver2.search_by_entry", icon= 'VIEWZOOM')
                 layout.separator()
             row = layout.row()
             row.label(text=Global_gamepath)
@@ -4310,6 +4408,8 @@ classes = (
     MaterialTextureEntryOperator,
     EntrySectionOperator,
     SaveTextureFromPNGOperator,
+    SearchByEntryIDOperator,
+    ChangeSearchpathOperator,
 )
 
 Global_TocManager = TocManager()
