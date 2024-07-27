@@ -3990,9 +3990,9 @@ class HellDivers2ToolsPanel(Panel):
                     prefix = TextureTypeLookup[Entry.MaterialTemplate][i] if Entry.MaterialTemplate != None else ""
                     label = filepath.name if ddsPath != None else str(t)
                     row.operator("helldiver2.material_texture_entry", icon='FILE_IMAGE', text=prefix+label, emboss=False) 
-                    props = row.operator("helldiver2.material_settex", icon='FILEBROWSER', text="")
-                    props.object_id = str(Entry.FileID)
-                    props.tex_idx = i
+                    # props = row.operator("helldiver2.material_settex", icon='FILEBROWSER', text="")
+                    # props.object_id = str(Entry.FileID)
+                    # props.tex_idx = i
 
     def draw_entry_buttons(self, box, row, Entry, PatchOnly):
         if Entry.TypeID == MeshID:
