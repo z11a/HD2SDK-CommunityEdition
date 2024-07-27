@@ -2437,7 +2437,10 @@ class StingrayMeshFile:
         for n in range(len(self.MeshInfoArray)):
             NewMesh     = RawMeshClass()
             Mesh_Info   = self.MeshInfoArray[n]
-            # print("Num: ", len(self.StreamInfoArray), " Index: ", Mesh_Info.StreamIndex)
+            PrettyPrint(f"Num: {len(self.StreamInfoArray)} Index: {Mesh_Info.StreamIndex}")
+            if Mesh_Info.StreamIndex >= len(self.StreamInfoArray):
+                PrettyPrint("Stream index out of bounds", "ERROR")
+                continue
             Stream_Info = self.StreamInfoArray[Mesh_Info.StreamIndex]
             NewMesh.MeshInfoIndex = n
             NewMesh.MeshID = Mesh_Info.MeshID
