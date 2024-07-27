@@ -2658,9 +2658,11 @@ def MeshNotValidToSave(self):
     return PatchesNotLoaded(self) or DuplicateIDsInScene(self) or IncorrectVertexGroupNaming(self) or ObjectHasModifiers(self) or AllTransformsApplied(self) or MaterialsNumberNames(self)
 
 def hex_to_decimal(hex_string):
-    hex_string = hex_string.removeprefix("0x")
-    decimal_value = int(hex_string, 16)
-    return decimal_value
+    try:
+        decimal_value = int(hex_string, 16)
+        return decimal_value
+    except ValueError:
+        print(f"Invalid hexadecimal string: {hex_string}")
 
 def SearchByEntryID(self, file):
     if Global_searchpath == "":
@@ -2718,8 +2720,15 @@ def SearchByEntryID(self, file):
                                 PrettyPrint(f"Created Output file at {outputfile}")
                                 return{'FINISHED'}
 
-    PrettyPrint(f"Could not find {len(fileIDs)} IDs", "ERROR")
     PrettyPrint(fileIDs)
+    PrettyPrint(f"Could not find {len(fileIDs)} IDs", "ERROR")
+    curenttime = str(datetime.datetime.now()).replace(":", "-").replace(".", "_")
+    outputfile = f"{Global_searchpath}output_{curenttime}.txt"
+    output = open(outputfile, "w")
+    for item in found:
+        output.write(item + "\n")
+    output.close()
+    PrettyPrint(f"Created Output file at {outputfile}")
     return{'FINISHED'}
 
 class ChangeFilepathOperator(Operator, ImportHelper):
