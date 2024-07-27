@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 9, 0),
+    "version": (1, 9, 1),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -2118,7 +2118,10 @@ class StingrayMeshFile:
             elif self.StreamInfoOffset > 0:
                 UnreversedData1Size = self.StreamInfoOffset-f.tell()
         else: UnreversedData1Size = len(self.UnReversedData1)
-        self.UnReversedData1    = f.bytes(self.UnReversedData1, UnreversedData1Size)
+        try:
+            self.UnReversedData1    = f.bytes(self.UnReversedData1, UnreversedData1Size)
+        except:
+            PrettyPrint(f"Could not set UnReversedData1", "ERROR")
 
         # Bone Info
         if f.IsReading(): f.seek(self.BoneInfoOffset)
@@ -2437,10 +2440,13 @@ class StingrayMeshFile:
         for n in range(len(self.MeshInfoArray)):
             NewMesh     = RawMeshClass()
             Mesh_Info   = self.MeshInfoArray[n]
-            PrettyPrint(f"Num: {len(self.StreamInfoArray)} Index: {Mesh_Info.StreamIndex}")
-            if Mesh_Info.StreamIndex >= len(self.StreamInfoArray):
-                PrettyPrint("Stream index out of bounds", "ERROR")
-                continue
+
+            indexerror = Mesh_Info.StreamIndex >= len(self.StreamInfoArray)
+            messageerror = "ERROR" if indexerror else "INFO"
+            message = "Stream index out of bounds" if indexerror else ""
+            PrettyPrint(f"Num: {len(self.StreamInfoArray)} Index: {Mesh_Info.StreamIndex}    {message}", messageerror)
+            if indexerror: continue
+
             Stream_Info = self.StreamInfoArray[Mesh_Info.StreamIndex]
             NewMesh.MeshInfoIndex = n
             NewMesh.MeshID = Mesh_Info.MeshID
