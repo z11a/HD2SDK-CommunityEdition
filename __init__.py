@@ -2695,7 +2695,8 @@ def SearchByEntryID(self, file):
                                 name = fileID.split(" ", 1)[1]
                             except:
                                 name = "No Name"
-                            PrettyPrint(f"\nArchive: {filename} Entry ID: {ID} Name: {name}")
+                            PrettyPrint("")
+                            PrettyPrint(f"Archive: {filename} Entry ID: {ID} Name: {name}")
                             totaltime = time.time() - start_time
                             hours = round(totaltime / 3600)
                             minutes = round(totaltime / 60)
@@ -2848,7 +2849,7 @@ class BulkLoadOperator(Operator, ImportHelper):
         numEntries = len(entries)
         PrettyPrint(f"Loading {numEntries} Archives")
         numArchives = len(Global_TocManager.LoadedArchives)
-        entryList = (Global_gamepath + entry for entry in entries)
+        entryList = (Global_gamepath + entry.split(" ")[0] for entry in entries)
         Global_TocManager.BulkLoad(entryList)
         numArchives = len(Global_TocManager.LoadedArchives) - numArchives
         numSkipped = numEntries - numArchives
