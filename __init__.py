@@ -56,6 +56,8 @@ Global_configpath        = f"{AddonPath}.ini"
 
 Global_CPPHelper = ctypes.cdll.LoadLibrary(Global_dllpath) if os.path.isfile(Global_dllpath) else None
 
+Global_Foldouts = []
+
 #endregion
 
 #region Common Hashes & Lookups
@@ -3905,6 +3907,7 @@ class EntrySectionOperator(Operator):
     type: StringProperty(default = "")
 
     def execute(self, context):
+        global Global_Foldouts
         if self.type == str(MeshID):
             bpy.context.scene.Hd2ToolPanelSettings.ShowMeshes = not bpy.context.scene.Hd2ToolPanelSettings.ShowMeshes
         elif self.type == str(TexID):
@@ -3922,7 +3925,10 @@ class EntrySectionOperator(Operator):
         elif self.type == str(WwiseMetaDataID):
             bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseMetaData = not bpy.context.scene.Hd2ToolPanelSettings.ShowWwiseMetaData
         else:
-            bpy.context.scene.Hd2ToolPanelSettings.ShowOthers = not bpy.context.scene.Hd2ToolPanelSettings.ShowOthers
+            for i in range(len(Global_Foldouts)):
+                if Global_Foldouts[i][0] == str(self.type):
+                    Global_Foldouts[i][1] = not Global_Foldouts[i][1]
+                    PrettyPrint(f"Folding foldout: {Global_Foldouts[i]}")
         return {'FINISHED'}
 #endregion
 
@@ -4156,9 +4162,10 @@ class HellDivers2ToolsPanel(Panel):
 
                 # Get Type Icon
                 type_icon = 'FILE'
-                show = True
+                show = None
                 showExtras = scene.Hd2ToolPanelSettings.ShowExtras
                 EntryNum = 0
+                global Global_Foldouts
                 if Type.TypeID == MeshID:
                     show = scene.Hd2ToolPanelSettings.ShowMeshes
                     type_icon = 'FILE_3D'
@@ -4189,8 +4196,16 @@ class HellDivers2ToolsPanel(Panel):
                     type_icon = 'OUTLINER_DATA_SPEAKER'
                     if not showExtras: continue
                 else:
-                    show = scene.Hd2ToolPanelSettings.ShowOthers
-                    if not show: continue
+                    if not scene.Hd2ToolPanelSettings.ShowOthers: continue
+                    for section in Global_Foldouts:
+                        if section[0] == str(Type.TypeID):
+                            show = section[1]
+                            break
+                    if show == None:
+                        foldout = [str(Type.TypeID), False]
+                        Global_Foldouts.append(foldout)
+                        PrettyPrint(f"Adding Foldout ID: {foldout}")
+                    
 
                 fold_icon = "DOWNARROW_HLT" if show else "RIGHTARROW"
 
