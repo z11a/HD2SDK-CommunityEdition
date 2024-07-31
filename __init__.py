@@ -419,6 +419,9 @@ def CreateModel(model, id, customization_info, bone_names):
         # check physics
         if not bpy.context.scene.Hd2ToolPanelSettings.ImportPhysics and mesh.IsPhysicsBody():
             continue
+        # check static
+        if not bpy.context.scene.Hd2ToolPanelSettings.ImportStatic and mesh.IsStaticMesh():
+            continue
         # do safety check
         for face in mesh.Indices:
             for index in face:
@@ -1581,6 +1584,7 @@ class StingrayCompositeMesh:
         return self
 
 def LoadStingrayCompositeMesh(ID, TocData, GpuData, StreamData, Reload, MakeBlendObject):
+    raise Exception("Composite Meshes Are Not Yet Supported")
     StingrayCompositeMeshData = StingrayCompositeMesh()
     StingrayCompositeMeshData.Serialize(MemoryStream(TocData), MemoryStream(GpuData))
     return StingrayCompositeMeshData
@@ -1968,6 +1972,11 @@ class RawMeshClass:
         if self.IsPhysicsBody():
             IsLod = False
         return IsLod
+    def IsStaticMesh(self):
+        for vertex in self.VertexWeights:
+            if vertex != [0, 0, 0, 0]:
+                return False
+        return True
 
     def InitBlank(self, numVertices, numIndices, numUVs, numBoneIndices):
         self.VertexPositions    = [[0,0,0] for n in range(numVertices)]
@@ -3966,6 +3975,7 @@ class Hd2ToolPanelSettings(PropertyGroup):
     ImportLods       : BoolProperty(name="Import LODs", description = "Import LODs", default = False)
     ImportGroup0     : BoolProperty(name="Import Group 0 Only", description = "Only import the first vertex group, ignore others", default = True)
     ImportPhysics    : BoolProperty(name="Import Physics", description = "Import Physics Bodies", default = False)
+    ImportStatic     : BoolProperty(name="Import Static Meshes", description = "Import Static Meshes", default = False)
     MakeCollections  : BoolProperty(name="Make Collections", description = "Make new collection when importing meshes", default = False)
     Force2UVs        : BoolProperty(name="Force 2 UV Sets", description = "Force at least 2 UV sets, some materials require this", default = True)
     Force1Group      : BoolProperty(name="Force 1 Group", description = "Force mesh to only have 1 vertex group", default = True)
@@ -4053,6 +4063,7 @@ class HellDivers2ToolsPanel(Panel):
             row.prop(scene.Hd2ToolPanelSettings, "ImportGroup0")
             row.prop(scene.Hd2ToolPanelSettings, "MakeCollections")
             row.prop(scene.Hd2ToolPanelSettings, "ImportPhysics")
+            row.prop(scene.Hd2ToolPanelSettings, "ImportStatic")
             row = layout.row(); row.separator(); row.label(text="Export Options"); box = row.box(); row = box.grid_flow(columns=1)
             row.prop(scene.Hd2ToolPanelSettings, "Force2UVs")
             row.prop(scene.Hd2ToolPanelSettings, "Force1Group")
