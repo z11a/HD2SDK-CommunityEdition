@@ -42,11 +42,7 @@ Global_typehashpath      = f"{AddonPath}\\hashlists\\typehash.txt"
 Global_filehashpath      = f"{AddonPath}\\hashlists\\filehash.txt"
 Global_friendlynamespath = f"{AddonPath}\\hashlists\\friendlynames.txt"
 
-Global_armorhashpath     = f"{AddonPath}\\hashlists\\archivehashes\\armorhash.txt"
-Global_helmethashpath    = f"{AddonPath}\\hashlists\\archivehashes\\helmethash.txt"
-Global_capehashpath      = f"{AddonPath}\\hashlists\\archivehashes\\capehash.txt"
-Global_terminidhashpath  = f"{AddonPath}\\hashlists\\archivehashes\\terminidhash.txt"
-Global_automatonhashpath = f"{AddonPath}\\hashlists\\archivehashes\\automatonhash.txt"
+Global_archivehashpath   = f"{AddonPath}\\hashlists\\archivehashes\\"
 
 Global_defaultgamepath   = "C:\Program Files (x86)\Steam\steamapps\common\Helldivers 2\data\ "
 Global_defaultgamepath   = Global_defaultgamepath[:len(Global_defaultgamepath) - 1]
@@ -674,11 +670,11 @@ def LoadHash(path, title):
             Global_ArchiveHashes.append([parts[0], title + parts[1].replace("\n", "")])
                 
 def LoadArchiveHashes():
-    LoadHash(Global_armorhashpath, "Armor: ")
-    LoadHash(Global_helmethashpath, "Helmet: ")
-    LoadHash(Global_capehashpath, "Cape: ")
-    LoadHash(Global_terminidhashpath, "Terminid: ")
-    LoadHash(Global_automatonhashpath, "Automaton: ")
+    HashFiles = os.listdir(Global_archivehashpath)
+    for filename in HashFiles:
+        name = filename.replace(".txt", "") + ": "
+        filepath = Global_archivehashpath + filename
+        LoadHash(filepath, name)
 
     Global_ArchiveHashes.append(["9ba626afa44a3aa3", "SDK: Base Patch Archive"])
 
