@@ -2910,7 +2910,7 @@ class CreatePatchFromActiveOperator(Operator):
             return{'CANCELLED'}
         
         if Global_TocManager.ActiveArchive.Name != "9ba626afa44a3aa3":
-            self.report({'WARNING'}, f"Patch Created was Not From Default Archive")
+            self.report({'WARNING'}, f"Patch Created Was Not From Base Archive")
 
         Global_TocManager.CreatePatchFromActive(self.patch_name)
 
@@ -2925,9 +2925,10 @@ class CreatePatchFromActiveOperator(Operator):
     
     def draw(self, context):
         layout = self.layout
-
+        if Global_TocManager.ActiveArchive.Name != "9ba626afa44a3aa3":
+            layout.label(text="WARNING! Patch is not from Base Archive!")
         layout.prop(self, "patch_name")
-
+    
 class PatchArchiveOperator(Operator):
     bl_label = "Patch Archive"
     bl_idname = "helldiver2.archive_export"
@@ -2970,7 +2971,6 @@ class RenamePatchOperator(Operator):
     
     def draw(self, context):
         layout = self.layout
-
         layout.prop(self, "patch_name")
 
 class ExportPatchAsZipOperator(Operator, ImportHelper):
