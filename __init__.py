@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
-    "version": (1, 9, 1),
+    "version": (2, 0, 0),
     "blender": (4, 0, 0),
     "category": "Import-Export",
 }
@@ -70,29 +70,29 @@ WwiseMetaDataID  = 15351235653606224144
 
 TextureTypeLookup = {
     "original": (
-        "pbr: ", 
+        "PBR", 
         "", 
         "", 
         "", 
         "", 
-        "normal: ", 
+        "Normal", 
         "", 
-        "emission: ", 
+        "Emission", 
         "", 
-        "color: ", 
+        "Base Color", 
         "", 
         "", 
         ""
     ),
     "basic": (
-        "pbr: ", 
-        "color: ", 
-        "normal: "
+        "PBR", 
+        "Base Color", 
+        "Normal"
     ),
     "emissive": (
-        "normal/ao/roughness: ", 
-        "emission: ", 
-        "color/metallic: "
+        "Normal/AO/Roughness", 
+        "Emission", 
+        "Base Color/Metallic"
     )
 }
 
@@ -1326,7 +1326,7 @@ def SaveStingrayMaterial(ID, TocData, GpuData, StreamData, LoadedData):
     LoadedData.Serialize(f)
     return [f.Data, b"", b""]
 
-def AddMaterialToBlend(ID, StringrayMat, EmptyMatExists=False):
+def AddMaterialToBlend(ID, StingrayMat, EmptyMatExists=False):
     if EmptyMatExists:
         mat = bpy.data.materials[str(ID)]
     else:
@@ -1336,8 +1336,90 @@ def AddMaterialToBlend(ID, StringrayMat, EmptyMatExists=False):
     mat.diffuse_color = (r.random(), r.random(), r.random(), 1)
     mat.use_nodes = True
     #bsdf = mat.node_tree.nodes["Principled BSDF"] # It's not even used?
+
+    Entry = Global_TocManager.GetEntry(int(ID), MaterialID)
+    if Entry.MaterialTemplate != None: CreateAddonMaterial(ID, StingrayMat, mat, Entry)
+    
+def CreateAddonMaterial(ID, StingrayMat, mat, Entry):
+    group = mat.node_tree.nodes.new('ShaderNodeGroup')
+    treeName = f"{Entry.MaterialTemplate}-{str(ID)}"
+    nodeTree = bpy.data.node_groups.new(treeName, 'ShaderNodeTree')
+    group.node_tree = nodeTree
+    group.location = (0, 300)
+
+    group_input = nodeTree.nodes.new('NodeGroupInput')
+    group_input.location = (-400,0)
+    group_output = nodeTree.nodes.new('NodeGroupOutput')
+    group_output.location = (400,0)
+
     idx = 0
-    for TextureID in StringrayMat.TexIDs:
+    height = round(len(StingrayMat.TexIDs) * 300 / 2)
+    for TextureID in StingrayMat.TexIDs:
+        texImage = mat.node_tree.nodes.new('ShaderNodeTexImage')
+        texImage.location = (-450, height - 300*idx)
+
+        name = TextureTypeLookup[Entry.MaterialTemplate][idx]
+        if name == "Normal": socket_type = "NodeSocketVector"
+        else: socket_type = "NodeSocketColor"
+        nodeTree.interface.new_socket(name=name, in_out ="INPUT", socket_type=socket_type).hide_value = True
+
+        try:    bpy.data.images[str(TextureID)]
+        except: Global_TocManager.Load(TextureID, TexID, False, True)
+        try: texImage.image = bpy.data.images[str(TextureID)]
+        except:
+            PrettyPrint(f"Failed to load texture {TextureID}. This is not fatal, but does mean that the materials in Blender will have empty image texture nodes", "warn")
+            pass
+
+        mat.node_tree.links.new(texImage.outputs['Color'], group.inputs[idx])
+        idx +=1
+
+    nodeTree.interface.new_socket(name="Surface",in_out ="OUTPUT", socket_type="NodeSocketShader")
+
+    nodes = mat.node_tree.nodes
+    for node in nodes:
+        if node.type == 'BSDF_PRINCIPLED':
+            nodes.remove(node)
+        elif node.type == 'OUTPUT_MATERIAL':
+             mat.node_tree.links.new(group.outputs['Surface'], node.inputs['Surface'])
+    
+    inputNode = nodeTree.nodes.get('Group Input')
+    outputNode = nodeTree.nodes.get('Group Output')
+    bsdf = nodeTree.nodes.new('ShaderNodeBsdfPrincipled')
+    bsdf.location = (50, 0)
+    separateColor = nodeTree.nodes.new('ShaderNodeSeparateColor')
+    separateColor.location = (-150, 0)
+    
+    if Entry.MaterialTemplate == "basic": SetupBasicBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor)
+    elif Entry.MaterialTemplate == "original": SetupOriginalBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor)
+    elif Entry.MaterialTemplate == "emissive": SetupEmissiveBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor)
+    
+def SetupBasicBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor):
+    nodeTree.links.new(inputNode.outputs['Base Color'], bsdf.inputs['Base Color'])
+    nodeTree.links.new(inputNode.outputs['Normal'], bsdf.inputs['Normal'])
+    nodeTree.links.new(inputNode.outputs['PBR'], separateColor.inputs['Color'])
+    nodeTree.links.new(separateColor.outputs['Red'], bsdf.inputs['Metallic'])
+    nodeTree.links.new(separateColor.outputs['Green'], bsdf.inputs['Roughness'])
+    nodeTree.links.new(bsdf.outputs['BSDF'], outputNode.inputs['Surface'])
+
+def SetupOriginalBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor):
+    nodeTree.links.new(inputNode.outputs['Base Color'], bsdf.inputs['Base Color'])
+    nodeTree.links.new(inputNode.outputs['Normal'], bsdf.inputs['Normal'])
+    nodeTree.links.new(inputNode.outputs['Emission'], bsdf.inputs['Emission Color'])
+    nodeTree.links.new(inputNode.outputs['PBR'], separateColor.inputs['Color'])
+    nodeTree.links.new(separateColor.outputs['Red'], bsdf.inputs['Metallic'])
+    nodeTree.links.new(separateColor.outputs['Green'], bsdf.inputs['Roughness'])
+    nodeTree.links.new(bsdf.outputs['BSDF'], outputNode.inputs['Surface'])
+
+def SetupEmissiveBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor):
+    nodeTree.links.new(inputNode.outputs['Base Color/Metallic'], bsdf.inputs['Base Color'])
+    nodeTree.links.new(inputNode.outputs['Emission'], bsdf.inputs['Emission Color'])
+    nodeTree.links.new(inputNode.outputs['Normal/AO/Roughness'], separateColor.inputs['Color'])
+    nodeTree.links.new(separateColor.outputs['Red'], bsdf.inputs['Normal'])
+    nodeTree.links.new(bsdf.outputs['BSDF'], outputNode.inputs['Surface'])
+
+def CreateGenericMaterial(ID, StingrayMat, mat):
+    idx = 0
+    for TextureID in StingrayMat.TexIDs:
         # Create Node
         texImage = mat.node_tree.nodes.new('ShaderNodeTexImage')
         texImage.location = (-450, 850 - 300*idx)
@@ -3555,6 +3637,11 @@ class AddMaterialOperator(Operator):
 
         Global_TocManager.AddNewEntryToPatch(Entry)
 
+        
+        EntriesIDs = IDsFromString(str(Entry.FileID))
+        for EntryID in EntriesIDs:
+            Global_TocManager.Load(int(EntryID), MaterialID)
+
         # Redraw
         for area in context.screen.areas:
             if area.type == "VIEW_3D": area.tag_redraw()
@@ -4014,9 +4101,10 @@ class HellDivers2ToolsPanel(Panel):
             row.operator("helldiver2.texture_saveblendimage", icon='FILE_BLEND', text="").object_id = str(Entry.FileID)
             row.operator("helldiver2.texture_import", icon='IMPORT', text="").object_id = str(Entry.FileID)
         elif Entry.TypeID == MaterialID:
-            row.operator("helldiver2.material_save", icon='FILE_BLEND', text="").object_id = str(Entry.FileID)
-            row.operator("helldiver2.material_import", icon='IMPORT', text="").object_id = str(Entry.FileID)
-            row.operator("helldiver2.material_showeditor", icon='MOD_LINEART', text="").object_id = str(Entry.FileID)
+            if Entry.MaterialTemplate == None:
+                row.operator("helldiver2.material_save", icon='FILE_BLEND', text="").object_id = str(Entry.FileID)
+                row.operator("helldiver2.material_import", icon='IMPORT', text="").object_id = str(Entry.FileID)
+                row.operator("helldiver2.material_showeditor", icon='MOD_LINEART', text="").object_id = str(Entry.FileID)
             self.draw_material_editor(Entry, box, row)
         if Global_TocManager.IsInPatch(Entry):
             props = row.operator("helldiver2.archive_removefrompatch", icon='FAKE_USER_ON', text="")
@@ -4258,6 +4346,9 @@ class HellDivers2ToolsPanel(Panel):
                     # Draw Entry
                     PatchEntry = Global_TocManager.GetEntry(int(Entry.FileID), int(Entry.TypeID))
                     PatchEntry.DEV_DrawIndex = len(DrawChain)
+                    
+                    if PatchEntry.MaterialTemplate != None:
+                        type_icon = "NODE_MATERIAL"
 
                     row = col.row(align=True); row.separator()
                     props = row.operator("helldiver2.archive_entry", icon=type_icon, text=FriendlyName, emboss=PatchEntry.IsSelected, depress=PatchEntry.IsSelected)
@@ -4351,7 +4442,7 @@ class WM_MT_button_context(Menu):
                 row.operator("helldiver2.texture_export", icon='EXPORT', text="Export Texture").object_id = str(Entry.FileID)
             else:
                 row.operator("helldiver2.texture_batchexport", icon='EXPORT', text=f"Export {NumSelected} Textures").object_id = FileIDStr
-        elif AreAllMaterials:
+        elif AreAllMaterials and Entry.MaterialTemplate == None:
             row.operator("helldiver2.material_import", icon='IMPORT', text=ImportMaterialName).object_id = FileIDStr
         # Draw export buttons
         row.separator()
@@ -4372,7 +4463,7 @@ class WM_MT_button_context(Menu):
             if SingleEntry:
                 row.operator("helldiver2.texture_savefromdds", icon='IMAGE_REFERENCE', text="Import DDS").object_id = str(Entry.FileID)
                 row.operator("helldiver2.texture_savefrompng", icon='IMAGE_REFERENCE', text="Import PNG").object_id = str(Entry.FileID)
-        elif AreAllMaterials:
+        elif AreAllMaterials and Entry.MaterialTemplate == None:
             row.operator("helldiver2.material_save", icon='FILE_BLEND', text=SaveMaterialName).object_id = FileIDStr
         # Draw copy ID buttons
         if SingleEntry:
