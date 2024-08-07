@@ -1338,6 +1338,9 @@ def AddMaterialToBlend(ID, StingrayMat, EmptyMatExists=False):
     #bsdf = mat.node_tree.nodes["Principled BSDF"] # It's not even used?
 
     Entry = Global_TocManager.GetEntry(int(ID), MaterialID)
+    if Entry == None:
+        PrettyPrint(f"No Entry Found when getting Material ID: {ID}", "ERROR")
+        return
     if Entry.MaterialTemplate != None: CreateAddonMaterial(ID, StingrayMat, mat, Entry)
     
 def CreateAddonMaterial(ID, StingrayMat, mat, Entry):
