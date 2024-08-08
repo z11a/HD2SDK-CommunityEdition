@@ -1342,7 +1342,23 @@ def AddMaterialToBlend(ID, StingrayMat, EmptyMatExists=False):
         PrettyPrint(f"No Entry Found when getting Material ID: {ID}", "ERROR")
         return
     if Entry.MaterialTemplate != None: CreateAddonMaterial(ID, StingrayMat, mat, Entry)
+    else: CreateGameMaterial(StingrayMat, mat)
     
+def CreateGameMaterial(StingrayMat, mat):
+    idx = 0
+    height = round(len(StingrayMat.TexIDs) * 300 / 2)
+    for TextureID in StingrayMat.TexIDs:
+        texImage = mat.node_tree.nodes.new('ShaderNodeTexImage')
+        texImage.location = (-450, height - 300*idx)
+
+        try:    bpy.data.images[str(TextureID)]
+        except: Global_TocManager.Load(TextureID, TexID, False, True)
+        try: texImage.image = bpy.data.images[str(TextureID)]
+        except:
+            PrettyPrint(f"Failed to load texture {TextureID}. This is not fatal, but does mean that the materials in Blender will have empty image texture nodes", "warn")
+            pass
+        idx +=1
+
 def CreateAddonMaterial(ID, StingrayMat, mat, Entry):
     group = mat.node_tree.nodes.new('ShaderNodeGroup')
     treeName = f"{Entry.MaterialTemplate}-{str(ID)}"
