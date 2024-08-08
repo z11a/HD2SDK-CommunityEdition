@@ -3382,7 +3382,7 @@ class SaveStingrayMeshOperator(Operator):
                     except:
                         self.report({'ERROR'}, f"Failed to find object with custom property ID. Object: {object.name}")
                         return{'CANCELLED'}
-        self.report({'INFO'}, f"Saved Mesh: {object.name}")
+        self.report({'INFO'}, f"Saved Mesh Object ID: {self.object_id}")
         return{'FINISHED'}
 
 class BatchSaveStingrayMeshOperator(Operator):
