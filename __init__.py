@@ -3770,7 +3770,7 @@ class LoadArchivesOperator(Operator):
         if self.paths_str != "" and os.path.exists(self.paths_str):
             Global_TocManager.LoadArchive(self.paths_str)
             id = self.paths_str.replace(Global_gamepath, "")
-            name = GetArchiveNameFromID(id) + id
+            name = f"{GetArchiveNameFromID(id)} {id}"
             self.report({'INFO'}, f"Loaded {name}")
             return{'FINISHED'}
         else:
