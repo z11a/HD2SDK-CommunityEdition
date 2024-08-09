@@ -100,6 +100,13 @@ TextureTypeLookup = {
 
 #region Functions: Miscellaneous
 
+def CheckBlenderVersion():
+    global OnCorrectBlenderVersion
+    BlenderVersion = bpy.app.version_string
+    version = BlenderVersion.split(".")
+    OnCorrectBlenderVersion = (version[0] == "4" and version[1] == "0")
+    PrettyPrint(f"Blender Version: {BlenderVersion} Correct Version: {OnCorrectBlenderVersion}")
+
 def PrettyPrint(msg, type="info"): # Inspired by FortnitePorting
     reset = u"\u001b[0m"
     color = reset
@@ -4145,9 +4152,15 @@ class HellDivers2ToolsPanel(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+        row = layout.row()
+        global OnCorrectBlenderVersion
+        if not OnCorrectBlenderVersion:
+            row.label(text="Using Incorrect Blender Version!")
+            row = layout.row()
+            row.label(text="Please Use Blender 4.0")
+            return
 
         # Draw Settings, Documentation and Spreadsheet
-        row = layout.row()
         row.prop(scene.Hd2ToolPanelSettings, "MenuExpanded",
             icon="DOWNARROW_HLT" if scene.Hd2ToolPanelSettings.MenuExpanded else "RIGHTARROW",
             icon_only=True, emboss=False, text="Settings")
@@ -4575,6 +4588,7 @@ Global_TocManager = TocManager()
 def register():
     if Global_CPPHelper == None: raise Exception("HDTool_Helper is required by the addon but failed to load!")
     if not os.path.exists(Global_texconvpath): raise Exception("Texconv is not found, please install Texconv in /deps/")
+    CheckBlenderVersion()
     InitializeConfig()
     LoadNormalPalette(Global_palettepath)
     LoadTypeHashes()
