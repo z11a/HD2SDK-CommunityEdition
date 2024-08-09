@@ -54,6 +54,8 @@ Global_CPPHelper = ctypes.cdll.LoadLibrary(Global_dllpath) if os.path.isfile(Glo
 
 Global_Foldouts = []
 
+Global_SectionHeader = "---------- Helldivers 2 ----------"
+
 #endregion
 
 #region Common Hashes & Lookups
@@ -1414,6 +1416,8 @@ def CreateAddonMaterial(ID, StingrayMat, mat, Entry):
     bsdf.location = (50, 0)
     separateColor = nodeTree.nodes.new('ShaderNodeSeparateColor')
     separateColor.location = (-150, 0)
+
+    bpy.ops.file.unpack_all(method='REMOVE')
     
     if Entry.MaterialTemplate == "basic": SetupBasicBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor)
     elif Entry.MaterialTemplate == "original": SetupOriginalBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor)
@@ -3999,6 +4003,8 @@ class PasteCustomPropertyOperator(Operator):
 def CustomPropertyContext(self, context):
     layout = self.layout
     layout.separator()
+    layout.label(text=Global_SectionHeader)
+    layout.separator()
     layout.operator("helldiver2.copy_custom_properties", icon= 'COPYDOWN')
     layout.operator("helldiver2.paste_custom_properties", icon= 'PASTEDOWN')
     layout.operator("helldiver2.archive_mesh_batchsave", icon= 'FILE_BLEND',)
@@ -4439,7 +4445,7 @@ class WM_MT_button_context(Menu):
         
         # Draw seperator
         row.separator()
-        row.label(text="---------- HellDivers2 ----------")
+        row.label(text=Global_SectionHeader)
 
         # Draw copy button
         row.separator()
