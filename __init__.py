@@ -3034,6 +3034,9 @@ class CreatePatchFromActiveOperator(Operator):
         return{'FINISHED'}
     
     def invoke(self, context, event):
+        if Global_TocManager.ActiveArchive == None:
+            self.report({"ERROR"}, "No patch exists, please create one first")
+            return {'CANCELLED'}
         return context.window_manager.invoke_props_dialog(self)
     
     def draw(self, context):
@@ -3080,6 +3083,9 @@ class RenamePatchOperator(Operator):
         return{'FINISHED'}
     
     def invoke(self, context, event):
+        if Global_TocManager.ActiveArchive == None:
+            self.report({"ERROR"}, "No patch exists, please create one first")
+            return {'CANCELLED'}
         return context.window_manager.invoke_props_dialog(self)
     
     def draw(self, context):
