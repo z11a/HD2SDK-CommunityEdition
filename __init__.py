@@ -3022,7 +3022,7 @@ class CreatePatchFromActiveOperator(Operator):
     bl_idname = "helldiver2.archive_createpatch"
     bl_description = "Creates Patch from Current Active Archive"
 
-    patch_name: StringProperty(name="Patch Name")
+    patch_name: StringProperty(name="Mod Name")
 
     def execute(self, context):
         if ArchivesNotLoaded(self):
@@ -3074,7 +3074,7 @@ class RenamePatchOperator(Operator):
     bl_idname = "helldiver2.rename_patch"
     bl_description = "Change Name of Current Active Patch"
 
-    patch_name: StringProperty(name="Patch Name")
+    patch_name: StringProperty(name="Mod Name")
 
     def execute(self, context):
         if PatchesNotLoaded(self):
