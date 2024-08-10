@@ -2762,8 +2762,14 @@ def AllTransformsApplied(self):
         if transforms != None and obj.location == transforms[0] and obj.rotation_euler == transforms[1] and obj.scale == transforms[2]:
             PrettyPrint(f"Found Correct Transforms for Object: {obj.name}")
             return False
-        if any(obj.location) or any(obj.rotation_euler) or any(scale - 1.0 for scale in obj.scale):
-            self.report({'ERROR'}, f"Object: {obj.name} has unapplied transforms")
+        else:
+            if obj.location != transforms[0]:
+                PrettyPrint(f"Object Location: {obj.location} Expected Location: {transforms[0]}")
+            if obj.rotation_euler != transforms[1]:
+                PrettyPrint(f"Object Rotation: {obj.rotation_euler} Expected Rotation: {transforms[1]}")
+            if obj.scale != transforms[2]:
+                PrettyPrint(f"Object Scale: {obj.scale} Expected Scale: {transforms[2]}")
+            self.report({'ERROR'}, f"Object: {obj.name} has mismatched transforms. See Console")
             return True
     return False
 
