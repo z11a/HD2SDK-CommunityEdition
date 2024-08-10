@@ -3108,14 +3108,14 @@ class ExportPatchAsZipOperator(Operator, ExportHelper):
     filter_glob: StringProperty(default='*.zip', options={'HIDDEN'})
 
     def invoke(self, context, event):
-        patch = Global_TocManager.ActivePatch
-        if patch == None:
-            self.report({"ERROR"}, "No patch exists, please create one first")
-            return {'CANCELLED'}
-        patchName = patch.LocalName
-        if patchName == "":
-            patchName = "unnamed patch"
-        self.filename = patchName
+        # patch = Global_TocManager.ActivePatch
+        # if patch == None:
+        #     self.report({"ERROR"}, "No patch exists, please create one first")
+        #     return {'CANCELLED'}
+        # patchName = patch.LocalName
+        # if patchName == "":
+        #     patchName = "unnamed patch"
+        self.filename = "what"
 
     def execute(self, context):
         if PatchesNotLoaded(self):
