@@ -49,6 +49,7 @@ Global_defaultgamepath   = Global_defaultgamepath[:len(Global_defaultgamepath) -
 Global_gamepath          = ""
 Global_searchpath        = ""
 Global_configpath        = f"{AddonPath}.ini"
+Global_backslash         = "\-".replace("-", "")
 
 Global_CPPHelper = ctypes.cdll.LoadLibrary(Global_dllpath) if os.path.isfile(Global_dllpath) else None
 
@@ -3085,29 +3086,37 @@ class RenamePatchOperator(Operator):
         layout = self.layout
         layout.prop(self, "patch_name")
 
-class ExportPatchAsZipOperator(Operator, ImportHelper):
+class ExportPatchAsZipOperator(Operator, ExportHelper):
     bl_label = "Export Patch"
     bl_idname = "helldiver2.export_patch"
     bl_description = "Exports the Current Active Patch as a Zip File"
     
-    filename_ext = "."
+    filename_ext = ".zip"
     use_filter_folder = True
-    
+    filter_glob: StringProperty(default='*.zip', options={'HIDDEN'})
+
+    def invoke(self, context, event):
+        patch = Global_TocManager.ActivePatch
+        if patch == None:
+            self.report({"ERROR"}, "No patch exists, please create one first")
+            return {'CANCELLED'}
+        patchName = patch.LocalName
+        if patchName == "":
+            patchName = "unnamed patch"
+        self.filename = patchName
+
     def execute(self, context):
         if PatchesNotLoaded(self):
             return {'CANCELLED'}
         
-        exportpath = self.properties.filepath
-        if not os.path.isdir(exportpath):
-            msg = "Please select a directory, not a file:\n" + exportpath
-            self.report({'WARNING'}, msg)
-            return {'CANCELLED'}
+        filepath = self.properties.filepath
+        exportpath = filepath.replace(".zip", "")
+        exportname = filepath.split(Global_backslash)[-1]
         
         patchName = Global_TocManager.ActivePatch.LocalName
         if patchName == "":
             patchName = "unnamed patch"
         patchFile = Global_TocManager.ActivePatch.Name
-        zipPath = exportpath + patchName
         tempDirectory = bpy.app.tempdir + patchName
         patchPath = Global_gamepath + patchFile
 
@@ -3122,10 +3131,10 @@ class ExportPatchAsZipOperator(Operator, ImportHelper):
         shutil.copyfile(file, f"{tempDirectory}\{patchFile}.gpu_resources")
         file = patchPath + ".stream"
         shutil.copyfile(file, f"{tempDirectory}\{patchFile}.stream")
-        shutil.make_archive(zipPath, 'zip', tempDirectory)
+        shutil.make_archive(exportpath, 'zip', tempDirectory)
 
-        if os.path.exists(f"{zipPath}.zip"):
-            self.report({'INFO'}, f"{patchName} Exported Successfully")
+        if os.path.exists(filepath):
+            self.report({'INFO'}, f"{patchName} Exported Successfully As {exportname}")
         else: 
             self.report({'ERROR'}, f"Failed to Export {patchName}")
 
