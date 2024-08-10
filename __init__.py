@@ -3519,7 +3519,7 @@ class ExportTextureOperator(Operator, ExportHelper):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
     
-class ExportTextureOperatorPNG(Operator, ExportHelper):
+class ExportTexturePNGOperator(Operator, ExportHelper):
     bl_label = "Export Texture"
     bl_idname = "helldiver2.texture_export_png"
     bl_description = "Export Texture to a Desired File Location"
@@ -3538,12 +3538,11 @@ class ExportTextureOperatorPNG(Operator, ExportHelper):
             dds_path = f"{tempdir}\\{filename}.dds"
             with open(dds_path, 'w+b') as f:
                 f.write(Entry.LoadedData.ToDDS())
-            PrettyPrint(self.filepath)
             subprocess.run([Global_texconvpath, "-y", "-o", directory, "-ft", "png", "-f", "R8G8B8A8_UNORM", dds_path])
             if os.path.isfile(self.filepath):
                 self.report({'INFO'}, f"Saved PNG Texture to: {self.filepath}")
             else:
-                raise Exception("Failed to Export texture as PNG")
+                self.report({'ERROR'}, f"Failed to Save Texture: {self.filepath}")
         return{'FINISHED'}
     
     def invoke(self, context, event):
@@ -3577,7 +3576,41 @@ class BatchExportTextureOperator(Operator):
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
+    
+class BatchExportTexturePNGOperator(Operator):
+    bl_label = "Export Texture"
+    bl_idname = "helldiver2.texture_batchexport_png"
+    bl_description = "Export Textures to a Desired File Location"
+    filename_ext = ".png"
 
+    directory: StringProperty(name="Outdir Path",description="png output dir")
+    filter_folder: BoolProperty(default=True,options={"HIDDEN"})
+
+    object_id: StringProperty(options={"HIDDEN"})
+    def execute(self, context):
+        EntriesIDs = IDsFromString(self.object_id)
+        exportedfiles = 0
+        for EntryID in EntriesIDs:
+            Global_TocManager.Load(EntryID, TexID)
+            Entry = Global_TocManager.GetEntry(EntryID, TexID)
+            if Entry != None:
+                tempdir = tempfile.gettempdir()
+                dds_path = f"{tempdir}\\{EntryID}.dds"
+                with open(dds_path, 'w+b') as f:
+                    f.write(Entry.LoadedData.ToDDS())
+                subprocess.run([Global_texconvpath, "-y", "-o", self.directory, "-ft", "png", "-f", "R8G8B8A8_UNORM", dds_path])
+                filepath = f"{self.directory}\\{EntryID}.png"
+                if os.path.isfile(filepath):
+                    exportedfiles += 1
+                else:
+                    self.report({'ERROR'}, f"Failed to save texture as PNG: {filepath}")
+        self.report({'INFO'}, f"Exported {exportedfiles} PNG Files To: {self.directory}")
+        return{'FINISHED'}
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+    
 # import texture from archive button
 class SaveTextureFromDDSOperator(Operator, ImportHelper):
     bl_label = "Import DDS"
@@ -4542,13 +4575,15 @@ class WM_MT_button_context(Menu):
             row.operator("helldiver2.texture_saveblendimage", icon='FILE_BLEND', text=SaveTextureName).object_id = FileIDStr
             if SingleEntry:
                 row.separator()
-                row.operator("helldiver2.texture_savefromdds", icon='FILE_IMAGE', text="Import DDS").object_id = str(Entry.FileID)
-                row.operator("helldiver2.texture_savefrompng", icon='FILE_IMAGE', text="Import PNG").object_id = str(Entry.FileID)
+                row.operator("helldiver2.texture_savefromdds", icon='FILE_IMAGE', text="Import DDS Texture").object_id = str(Entry.FileID)
+                row.operator("helldiver2.texture_savefrompng", icon='FILE_IMAGE', text="Import PNG Texture").object_id = str(Entry.FileID)
                 row.separator()
-                row.operator("helldiver2.texture_export", icon='OUTLINER_OB_IMAGE', text="Export DDS").object_id = str(Entry.FileID)
-                row.operator("helldiver2.texture_export_png", icon='OUTLINER_OB_IMAGE', text="Export PNG").object_id = str(Entry.FileID)
+                row.operator("helldiver2.texture_export", icon='OUTLINER_OB_IMAGE', text="Export DDS Texture").object_id = str(Entry.FileID)
+                row.operator("helldiver2.texture_export_png", icon='OUTLINER_OB_IMAGE', text="Export PNG Texture").object_id = str(Entry.FileID)
             else:
+                row.separator()
                 row.operator("helldiver2.texture_batchexport", icon='OUTLINER_OB_IMAGE', text=f"Export {NumSelected} DDS Textures").object_id = FileIDStr
+                row.operator("helldiver2.texture_batchexport_png", icon='OUTLINER_OB_IMAGE', text=f"Export {NumSelected} PNG Textures").object_id = FileIDStr
         elif AreAllMaterials and Entry.MaterialTemplate == None:
             row.operator("helldiver2.material_save", icon='FILE_BLEND', text=SaveMaterialName).object_id = FileIDStr
         # Draw copy ID buttons
@@ -4635,7 +4670,8 @@ classes = (
     SaveTextureFromPNGOperator,
     SearchByEntryIDOperator,
     ChangeSearchpathOperator,
-    ExportTextureOperatorPNG,
+    ExportTexturePNGOperator,
+    BatchExportTexturePNGOperator,
 )
 
 Global_TocManager = TocManager()
