@@ -50,3 +50,7 @@ ff2a9db5dfe875d3 FS-11 Executioner
 1bf281b613081b05 TR-117 Alpha Commander
 202af54b4fe5dd85 TR-7 Ambassador of the Brand
 9d538582c1cd96b8 TR-9 Cavalier of Democracy
+71aa8c9bf9a0aef0 I-44 Salamander Helmet
+e9f6ef51d693fdd5 I-102 Draco Helmet
+9e9d2e828d1146d0 I-92 Fire Fighter
+98d52b64727d362b I-09 Heatseeker
