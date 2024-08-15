@@ -17,3 +17,6 @@ c082febf2a0d29e6 Stalker
 3c5227a93c2382a1 Warrior
 94d5c96412fdbbdb Warrior
 cdc32c2d1b60aa9e Warrior
+50c4a70c3174bc79 Impaler Tentacle
+987b77ea5a7e5d9e Impaler
+cb1a080e107f3132 Brood Commander
