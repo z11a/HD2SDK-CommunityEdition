@@ -2763,6 +2763,9 @@ def AllTransformsApplied(self):
             PrettyPrint(f"Found Correct Transforms for Object: {obj.name}")
             return False
         else:
+            if transforms == None: 
+                PrettyPrint(f"Failed to find any Cashed Transforms for Object: {obj.name} ID: {ID}", "WARN")
+                return False
             if obj.location != transforms[0]:
                 PrettyPrint(f"Object Location: {obj.location} Expected Location: {transforms[0]}")
             if obj.rotation_euler != transforms[1]:
