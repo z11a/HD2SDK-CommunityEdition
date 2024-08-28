@@ -2792,8 +2792,18 @@ def MaterialsNumberNames(self):
             return True
     return False
 
+def HasZeroVerticies(self):
+    mesh_objs = [ob for ob in bpy.context.selected_objects if ob.type == 'MESH']
+    for mesh in mesh_objs:
+        verts = len(mesh.data.vertices)
+        PrettyPrint(f"Object: {mesh.name} Verticies: {verts}")
+        if verts <= 0:
+            self.report({'ERROR'}, f"Object: {mesh.name} has no zero verticies")
+            return True
+    return False
+
 def MeshNotValidToSave(self):
-    return PatchesNotLoaded(self) or DuplicateIDsInScene(self) or IncorrectVertexGroupNaming(self) or ObjectHasModifiers(self) or AllTransformsApplied(self) or MaterialsNumberNames(self)
+    return PatchesNotLoaded(self) or DuplicateIDsInScene(self) or IncorrectVertexGroupNaming(self) or ObjectHasModifiers(self) or AllTransformsApplied(self) or MaterialsNumberNames(self) or HasZeroVerticies(self)
 
 def hex_to_decimal(hex_string):
     try:
