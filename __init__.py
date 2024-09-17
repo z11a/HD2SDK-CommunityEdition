@@ -2813,6 +2813,8 @@ def SearchByEntryID(self, file):
     fileIDs = findme.read().splitlines()
     findme.close()
 
+    forceSearch = bpy.context.scene.Hd2ToolPanelSettings.ForceSearchAll
+
     directorys = os.listdir(Global_gamepath)
     searched = 0
     foundIDs = 0
@@ -2843,10 +2845,15 @@ def SearchByEntryID(self, file):
                             seconds = round(totaltime % 60)
                             PrettyPrint(f"Overall Time: {hours} hrs {minutes} min {seconds} sec")
 
-                            found.append(f"{filename} {name}")
-                            fileIDs.remove(fileID)
-                            foundIDs += 1
-                            PrettyPrint(f"Found {foundIDs}/{totalIDs} IDs\n")
+                            foundItem = f"{filename} {name}"
+                            if foundItem not in found:
+                                found.append(foundItem)
+                            if not forceSearch:
+                                fileIDs.remove(fileID)
+                                foundIDs += 1
+                                PrettyPrint(f"Found {foundIDs}/{totalIDs} IDs\n")
+                            else:
+                                PrettyPrint(f"Found {foundIDs} total occurrences of any IDs\n")
                             if len(fileIDs) == 0:
                                 PrettyPrint(f"Finished Searching {searched}/{len(directorys)} files")
                                 curenttime = str(datetime.datetime.now()).replace(":", "-").replace(".", "_")
@@ -2857,9 +2864,11 @@ def SearchByEntryID(self, file):
                                 output.close()
                                 PrettyPrint(f"Created Output file at {outputfile}")
                                 return{'FINISHED'}
-
-    PrettyPrint(fileIDs)
-    PrettyPrint(f"Could not find {len(fileIDs)} IDs", "ERROR")
+    if forceSearch:
+        PrettyPrint(f"Finished Force Searching {searched} files")
+    else:
+        PrettyPrint(fileIDs)
+        PrettyPrint(f"Could not find {len(fileIDs)} IDs", "ERROR")
     curenttime = str(datetime.datetime.now()).replace(":", "-").replace(".", "_")
     outputfile = f"{Global_searchpath}output_{curenttime}.txt"
     output = open(outputfile, "w")
@@ -4184,6 +4193,7 @@ class Hd2ToolPanelSettings(PropertyGroup):
     EnableTools           : BoolProperty(name="Research Tools", description = "Custom Archive Searching Tools", default = False)
     UnloadEmptyArchives   : BoolProperty(name="Unload Empty Archives", description="Unload Archives that do not Contain any Textures, Materials, or Meshes", default = True)
     DeleteOnLoadArchive   : BoolProperty(name="Nuke Files on Archive Load", description="Delete all Textures, Materials, and Meshes in project when selecting a new archive", default = False)
+    ForceSearchAll        : BoolProperty(name="Force Search All Files", description="Searches for all IDs in every file instead of ending early")
 
 class HellDivers2ToolsPanel(Panel):
     bl_label = f"Helldivers 2 SDK: Community Edition v{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}"
@@ -4281,6 +4291,7 @@ class HellDivers2ToolsPanel(Panel):
                 #row.label()
                 row.label(text="WARNING! Developer Tools, Please Know What You Are Doing!")
                 row.prop(scene.Hd2ToolPanelSettings, "UnloadEmptyArchives")
+                row.prop(scene.Hd2ToolPanelSettings, "ForceSearchAll")
                 #row.prop(scene.Hd2ToolPanelSettings, "DeleteOnLoadArchive")
                 row.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
                 search = layout.row()
