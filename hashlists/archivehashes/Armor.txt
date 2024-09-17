@@ -1,4 +1,4 @@
-4ceb3d4e31097c68 B-01 Tactical (Variation 1)
+08e906980c632592 B-01 Tactical (Variation 1)
 562a45e9bc984eb9 B-01 Tactical (Variation 2)
 6cd3d55c05d4eac1 B-01 Tactical (Variation 3)
 519cc1ec2eb56e1d B-01 Tactical (Variation 4)
@@ -57,7 +57,7 @@ d451ab9c17f64b19 CW-4 Arctic Ranger
 f1973d347198bd6f EX-16 Prototype 16
 784acdd4158a9a42 CM-10 Clinician
 8ade54353acbe39d CE-74 Breaker
-08e906980c632592 CE-35 Trench Engineer
+4ceb3d4e31097c68 CE-35 Trench Engineer
 1683ee92e6aec3eb I-44 Salamander
 57cebd7e5f985d45 I-102 Draco
 78c4f1839dea282d I-92 Fire Fighter
