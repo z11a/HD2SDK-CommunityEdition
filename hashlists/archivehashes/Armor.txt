@@ -7,7 +7,7 @@
 31d06451a09679f1 FS-05 Marksman
 8670598c1f4462dc FS-05 Marksman
 ccac0a57aca3ae92 FS-05 Marksman
-d7e0e8a6c8ab0e2c FS-05 Marksman
+d7e0e8a6c8ab0e2c CM-17 Butcher
 9102938b4b2aef9d FS-23 Battle Master
 0bb13de574d4acce SC-34 Infiltrator
 5e0dba19a567fb99 DP-53 Savior of the Free
@@ -44,7 +44,6 @@ f1175472a3f1469a CE-64 Grenadier
 1d9e8acfc3ee3ace CW-22 Kodiak
 267fcb7e9e312e33 FS-37 Ravager
 2b6d645c35bce4ea EX-00 Prototype X
-31d06451a09679f1 CM-17 Butcher
 41203170aae394c0 CM-21 Trench Paramedic
 5e86a6b2862f92cf EX-03 Prototype 3
 5e9a360985f0a6e0 TR-117 Alpha Commander
