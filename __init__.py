@@ -1092,7 +1092,8 @@ class TocManager():
         self.ActivePatch = None
 
     def BulkLoad(self, list):
-        self.UnloadArchives()
+        if bpy.context.scene.Hd2ToolPanelSettings.UnloadPatches:
+            self.UnloadArchives()
         for itemPath in list:
             Global_TocManager.LoadArchive(itemPath)
 
@@ -4204,6 +4205,7 @@ class Hd2ToolPanelSettings(PropertyGroup):
     UnloadEmptyArchives   : BoolProperty(name="Unload Empty Archives", description="Unload Archives that do not Contain any Textures, Materials, or Meshes", default = True)
     DeleteOnLoadArchive   : BoolProperty(name="Nuke Files on Archive Load", description="Delete all Textures, Materials, and Meshes in project when selecting a new archive", default = False)
     ForceSearchAll        : BoolProperty(name="Force Search All Files", description="Searches for all IDs in every file instead of ending early")
+    UnloadPatches     : BoolProperty(name="Unload Previous Patches", description="Unload Previous Patches when bulk loading")
 
 class HellDivers2ToolsPanel(Panel):
     bl_label = f"Helldivers 2 SDK: Community Edition v{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}"
@@ -4302,12 +4304,14 @@ class HellDivers2ToolsPanel(Panel):
                 row.label(text="WARNING! Developer Tools, Please Know What You Are Doing!")
                 row.prop(scene.Hd2ToolPanelSettings, "UnloadEmptyArchives")
                 row.prop(scene.Hd2ToolPanelSettings, "ForceSearchAll")
+                row.prop(scene.Hd2ToolPanelSettings, "UnloadPatches")
                 #row.prop(scene.Hd2ToolPanelSettings, "DeleteOnLoadArchive")
-                row.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
+                col = box.grid_flow(columns=2)
+                col.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
+                col.operator("helldiver2.search_by_entry", icon= 'VIEWZOOM')
                 search = layout.row()
                 search.label(text=Global_searchpath)
                 search.operator("helldiver2.change_searchpath", icon='FILEBROWSER')
-                row.operator("helldiver2.search_by_entry", icon= 'VIEWZOOM')
                 layout.separator()
             row = layout.row()
             row.label(text=Global_gamepath)
