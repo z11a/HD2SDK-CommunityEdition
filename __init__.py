@@ -2806,6 +2806,10 @@ def HasZeroVerticies(self):
 def MeshNotValidToSave(self):
     return PatchesNotLoaded(self) or DuplicateIDsInScene(self) or IncorrectVertexGroupNaming(self) or ObjectHasModifiers(self) or AllTransformsApplied(self) or MaterialsNumberNames(self) or HasZeroVerticies(self)
 
+def CopyToClipboard(txt):
+    cmd='echo '+txt.strip()+'|clip'
+    return subprocess.check_call(cmd, shell=True)
+
 def hex_to_decimal(hex_string):
     try:
         decimal_value = int(hex_string, 16)
@@ -4109,7 +4113,11 @@ def CustomPropertyContext(self, context):
     layout.separator()
     layout.operator("helldiver2.copy_custom_properties", icon= 'COPYDOWN')
     layout.operator("helldiver2.paste_custom_properties", icon= 'PASTEDOWN')
-    layout.operator("helldiver2.archive_mesh_batchsave", icon= 'FILE_BLEND',)
+    layout.operator("helldiver2.archive_mesh_batchsave", icon= 'FILE_BLEND')
+    if bpy.context.scene.Hd2ToolPanelSettings.EnableTools:
+        layout.separator()
+        layout.operator("helldiver2.copy_hex_id", icon='COPY_ID')
+        layout.operator("helldiver2.copy_decimal_id", icon='COPY_ID')
 
 class CopyArchiveIDOperator(Operator):
     bl_label = "Copy Archive ID"
@@ -4123,6 +4131,47 @@ class CopyArchiveIDOperator(Operator):
         bpy.context.window_manager.clipboard = archiveID
         self.report({'INFO'}, f"Copied Archive ID: {archiveID}")
 
+        return {'FINISHED'}
+    
+class CopyHexIDOperator(Operator):
+    bl_label = "Copy Hex ID"
+    bl_idname = "helldiver2.copy_hex_id"
+    bl_description = "Copy the Hexidecimal ID of the selected mesh for the Diver tool"
+
+    def execute(self, context):
+        object = context.active_object
+        try:
+            ID = int(object["Z_ObjectID"])
+        except:
+            self.report({'ERROR'}, f"Object: {object.name} has not Helldivers property ID")
+            return {'CANCELLED'}
+
+        try:
+            hexID = hex(ID)
+        except:
+            self.report({'ERROR'}, f"Object: {object.name} ID: {ID} cannot be converted to hex")
+            return {'CANCELLED'}
+        
+        CopyToClipboard(hexID)
+        self.report({'INFO'}, f"Copied {object.name}'s property of {hexID}")
+        return {'FINISHED'}
+
+class CopyDecimalIDOperator(Operator):
+    bl_label = "Copy ID"
+    bl_idname = "helldiver2.copy_decimal_id"
+    bl_description = "Copy the decimal ID of the selected mesh"
+
+    def execute(self, context):
+        
+        object = context.active_object
+        try:
+            ID = str(object["Z_ObjectID"])
+        except:
+            self.report({'ERROR'}, f"Object: {object.name} has not Helldivers property ID")
+            return {'CANCELLED'}
+        
+        CopyToClipboard(ID)
+        self.report({'INFO'}, f"Copied {object.name}'s property of {ID}")
         return {'FINISHED'}
 
 class EntrySectionOperator(Operator):
@@ -4700,6 +4749,8 @@ classes = (
     ChangeSearchpathOperator,
     ExportTexturePNGOperator,
     BatchExportTexturePNGOperator,
+    CopyDecimalIDOperator,
+    CopyHexIDOperator,
 )
 
 Global_TocManager = TocManager()
