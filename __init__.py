@@ -3067,18 +3067,6 @@ class CreatePatchFromActiveOperator(Operator):
         
         return{'FINISHED'}
     
-    def invoke(self, context, event):
-        if Global_TocManager.ActiveArchive == None:
-            self.report({"ERROR"}, "No patch exists, please create one first")
-            return {'CANCELLED'}
-        return context.window_manager.invoke_props_dialog(self)
-    
-    def draw(self, context):
-        layout = self.layout
-        if Global_TocManager.ActiveArchive.Name != "9ba626afa44a3aa3":
-            layout.label(text="WARNING! Patch is not from Base Archive!")
-        layout.prop(self, "patch_name")
-    
 class PatchArchiveOperator(Operator):
     bl_label = "Patch Archive"
     bl_idname = "helldiver2.archive_export"
@@ -3098,9 +3086,9 @@ class PatchArchiveOperator(Operator):
         return{'FINISHED'}
 
 class RenamePatchOperator(Operator):
-    bl_label = "Rename Patch"
+    bl_label = "Rename Mod"
     bl_idname = "helldiver2.rename_patch"
-    bl_description = "Change Name of Current Active Patch"
+    bl_description = "Change Name of Current Mod Within the Tool"
 
     patch_name: StringProperty(name="Mod Name")
 
@@ -3143,9 +3131,7 @@ class ExportPatchAsZipOperator(Operator, ExportHelper):
         exportpath = filepath.replace(".zip", "")
         exportname = filepath.split(Global_backslash)[-1]
         
-        patchName = Global_TocManager.ActivePatch.LocalName
-        if patchName == "":
-            patchName = "unnamed patch"
+        patchName = Global_TocManager.ActivePatch.Name
         patchFile = Global_TocManager.ActivePatch.Name
         tempDirectory = bpy.app.tempdir + patchName
         patchPath = Global_gamepath + patchFile
@@ -4214,7 +4200,7 @@ def LoadedArchives_callback(scene, context):
     return [(Archive.Name, GetArchiveNameFromID(Archive.Name) if GetArchiveNameFromID(Archive.Name) != "" else Archive.Name, Archive.Name) for Archive in Global_TocManager.LoadedArchives]
 
 def Patches_callback(scene, context):
-    return [(Archive.Name, Archive.LocalName if Archive.LocalName != "" else "unnamed patch", Archive.Name) for Archive in Global_TocManager.Patches]
+    return [(Archive.Name, Archive.Name, Archive.Name) for Archive in Global_TocManager.Patches]
 
 class Hd2ToolPanelSettings(PropertyGroup):
     # Patches
@@ -4417,9 +4403,7 @@ class HellDivers2ToolsPanel(Panel):
             name = GetArchiveNameFromID(ArchiveID)
             title = f"{name}    ID: {ArchiveID}"
         if Global_TocManager.ActivePatch != None and scene.Hd2ToolPanelSettings.PatchOnly:
-            name = Global_TocManager.ActivePatch.LocalName
-            if name == "":
-                name = "unnamed patch"
+            name = Global_TocManager.ActivePatch.Name
             title = f"Patch: {name}    File: {Global_TocManager.ActivePatch.Name}"
         row.prop(scene.Hd2ToolPanelSettings, "ContentsExpanded",
             icon="DOWNARROW_HLT" if scene.Hd2ToolPanelSettings.ContentsExpanded else "RIGHTARROW",
