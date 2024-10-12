@@ -2944,7 +2944,8 @@ class DefaultLoadArchiveOperator(Operator):
     def execute(self, context):
         path = Global_gamepath + "9ba626afa44a3aa3"
         if not os.path.exists(path):
-            self.report({'ERROR'}, "Current Filepath is Invalid. Change This in Settings")
+            self.report({'ERROR'}, "Current Filepath is Invalid. Change this in the Settings")
+            context.scene.Hd2ToolPanelSettings.MenuExpanded = True
             return{'CANCELLED'}
         Global_TocManager.LoadArchive(path, True, False)
 
@@ -4320,35 +4321,35 @@ class HellDivers2ToolsPanel(Panel):
             return
 
         # Draw Settings, Documentation and Spreadsheet
+        mainbox = layout.box()
+        row = mainbox.row()
         row.prop(scene.Hd2ToolPanelSettings, "MenuExpanded",
             icon="DOWNARROW_HLT" if scene.Hd2ToolPanelSettings.MenuExpanded else "RIGHTARROW",
             icon_only=True, emboss=False, text="Settings")
-        row = layout.row()
-        row.operator("helldiver2.help", icon='HELP', text="Documentation")
-        row.operator("helldiver2.archive_spreadsheet", icon='INFO', text="Archive IDs")
-        row.operator("helldiver2.github", icon='URL', text= "")
+        row.label(icon="SETTINGS")
         
         if scene.Hd2ToolPanelSettings.MenuExpanded:
-            row = layout.row(); row.separator(); row.label(text="Display Types"); box = row.box(); row = box.grid_flow(columns=1)
+            row = mainbox.grid_flow(columns=2)
+            row = mainbox.row(); row.separator(); row.label(text="Display Types"); box = row.box(); row = box.grid_flow(columns=1)
             row.prop(scene.Hd2ToolPanelSettings, "ShowExtras")
             row.prop(scene.Hd2ToolPanelSettings, "ShowOthers")
-            row = layout.row(); row.separator(); row.label(text="Import Options"); box = row.box(); row = box.grid_flow(columns=1)
+            row = mainbox.row(); row.separator(); row.label(text="Import Options"); box = row.box(); row = box.grid_flow(columns=1)
             row.prop(scene.Hd2ToolPanelSettings, "ImportMaterials")
             row.prop(scene.Hd2ToolPanelSettings, "ImportLods")
             row.prop(scene.Hd2ToolPanelSettings, "ImportGroup0")
             row.prop(scene.Hd2ToolPanelSettings, "MakeCollections")
             row.prop(scene.Hd2ToolPanelSettings, "ImportPhysics")
             row.prop(scene.Hd2ToolPanelSettings, "ImportStatic")
-            row = layout.row(); row.separator(); row.label(text="Export Options"); box = row.box(); row = box.grid_flow(columns=1)
+            row = mainbox.row(); row.separator(); row.label(text="Export Options"); box = row.box(); row = box.grid_flow(columns=1)
             row.prop(scene.Hd2ToolPanelSettings, "Force2UVs")
             row.prop(scene.Hd2ToolPanelSettings, "Force1Group")
             row.prop(scene.Hd2ToolPanelSettings, "AutoLods")
             #Custom Searching tools
-            row = layout.row(); row.separator(); row.label(text="Research Tools"); box = row.box(); row = box.grid_flow(columns=1)
+            row = mainbox.row(); row.separator(); row.label(text="Research Tools"); box = row.box(); row = box.grid_flow(columns=1)
             # Draw Bulk Loader Extras
             row.prop(scene.Hd2ToolPanelSettings, "EnableTools")
             if scene.Hd2ToolPanelSettings.EnableTools:
-                row = layout.row(); box = row.box(); row = box.grid_flow(columns=1)
+                row = mainbox.row(); box = row.box(); row = box.grid_flow(columns=1)
                 #row.label()
                 row.label(text="WARNING! Developer Tools, Please Know What You Are Doing!")
                 row.prop(scene.Hd2ToolPanelSettings, "UnloadEmptyArchives")
@@ -4358,16 +4359,20 @@ class HellDivers2ToolsPanel(Panel):
                 col = box.grid_flow(columns=2)
                 col.operator("helldiver2.bulk_load", icon= 'IMPORT', text="Bulk Load")
                 col.operator("helldiver2.search_by_entry", icon= 'VIEWZOOM')
-                search = layout.row()
+                search = mainbox.row()
                 search.label(text=Global_searchpath)
                 search.operator("helldiver2.change_searchpath", icon='FILEBROWSER')
-                layout.separator()
-            row = layout.row()
+                mainbox.separator()
+            row = mainbox.row()
             row.label(text=Global_gamepath)
             row.operator("helldiver2.change_filepath", icon='FILEBROWSER')
-            layout.separator()
+            mainbox.separator()
 
         # Draw Archive Import/Export Buttons
+        row = layout.row(); row = layout.row()
+        row.operator("helldiver2.help", icon='HELP', text="Documentation")
+        row.operator("helldiver2.archive_spreadsheet", icon='INFO', text="Archive IDs")
+        row.operator("helldiver2.github", icon='URL', text= "")
         row = layout.row(); row = layout.row()
         row.operator("helldiver2.archive_import_default", icon= 'SOLO_ON', text="")
         row.operator("helldiver2.search_archives", icon= 'VIEWZOOM')
