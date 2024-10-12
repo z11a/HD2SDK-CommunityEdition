@@ -2804,7 +2804,7 @@ def HasZeroVerticies(self):
     return False
 
 def MeshNotValidToSave(self):
-    return PatchesNotLoaded(self) or DuplicateIDsInScene(self) or IncorrectVertexGroupNaming(self) or ObjectHasModifiers(self) or AllTransformsApplied(self) or MaterialsNumberNames(self) or HasZeroVerticies(self)
+    return PatchesNotLoaded(self) or DuplicateIDsInScene(self) or IncorrectVertexGroupNaming(self) or ObjectHasModifiers(self) or MaterialsNumberNames(self) or HasZeroVerticies(self)
 
 def CopyToClipboard(txt):
     cmd='echo '+txt.strip()+'|clip'
