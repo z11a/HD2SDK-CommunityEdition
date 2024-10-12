@@ -3406,6 +3406,10 @@ class SaveStingrayMeshOperator(Operator):
 
     object_id: StringProperty()
     def execute(self, context):
+        mode = context.mode
+        if mode != 'OBJECT':
+            self.report({'ERROR'}, f"You are Not in OBJECT Mode. Current Mode: {mode}")
+            return {'CANCELLED'}
         if MeshNotValidToSave(self):
             return {'CANCELLED'}
         wasSaved = Global_TocManager.Save(int(self.object_id), MeshID)
