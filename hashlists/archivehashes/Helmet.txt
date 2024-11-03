@@ -50,7 +50,16 @@ ff2a9db5dfe875d3 FS-11 Executioner
 1bf281b613081b05 TR-117 Alpha Commander
 202af54b4fe5dd85 TR-7 Ambassador of the Brand
 9d538582c1cd96b8 TR-9 Cavalier of Democracy
-71aa8c9bf9a0aef0 I-44 Salamander Helmet
-e9f6ef51d693fdd5 I-102 Draco Helmet
+71aa8c9bf9a0aef0 I-44 Salamander
+e9f6ef51d693fdd5 I-102 Draconaught
 9e9d2e828d1146d0 I-92 Fire Fighter
 98d52b64727d362b I-09 Heatseeker
+7ae5a2f32d6f24f1 AF-91 Field Chemist
+75a21fc49f80fb9c AF-91 Field Chemist
+eb3914f15e4151ff DP-00 Tactical
+15dcd137ebe874ed UF-50 Bloodhound
+a0a51b7b380c6d1a AF-50 Noxious Ranger
+fb025c06b0408e5f UF-16 Inspector
+884fde6481f699e3 AF-52 Lockdown
+88b7d737b6e62cc0 UF-84 Doubt Killer
+be1fbdaa4b77e86b AF-02 Haz-Master
