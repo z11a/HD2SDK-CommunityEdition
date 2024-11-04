@@ -693,21 +693,26 @@ def LoadArchiveHashes():
 #region Configuration
 
 def InitializeConfig():
+    global Global_gamepath, Global_searchpath, Global_configpath
     if os.path.exists(Global_configpath):
-        global Global_gamepath
         config = configparser.ConfigParser()
         config.read(Global_configpath, encoding='utf-8')
-        Global_gamepath = config['DEFAULT']['filepath']
+        try:
+            Global_gamepath = config['DEFAULT']['filepath']
+            Global_searchpath = config['DEFAULT']['searchpath']
+        except:
+            UpdateConfig()
         PrettyPrint(f"Loaded Data Folder: {Global_gamepath}")
 
     else:
-        UpdateConfig(Global_defaultgamepath)
+        UpdateConfig()
 
-def UpdateConfig(newpath):
-    global Global_gamepath
-    Global_gamepath = newpath
+def UpdateConfig():
+    global Global_gamepath, Global_searchpath, Global_defaultgamepath
+    if Global_gamepath == "":
+        Global_gamepath = Global_defaultgamepath
     config = configparser.ConfigParser()
-    config['DEFAULT'] = {'filepath' : newpath}
+    config['DEFAULT'] = {'filepath' : Global_gamepath, 'searchpath' : Global_searchpath}
     with open(Global_configpath, 'w') as configfile:
         config.write(configfile)
     
@@ -2896,6 +2901,7 @@ def SearchByEntryID(self, file):
 class ChangeFilepathOperator(Operator, ImportHelper):
     bl_label = "Change Filepath"
     bl_idname = "helldiver2.change_filepath"
+    bl_description = "Change the game's data folder directory"
     #filename_ext = "."
     use_filter_folder = True
 
@@ -2915,13 +2921,14 @@ class ChangeFilepathOperator(Operator, ImportHelper):
             self.report({'ERROR'}, f"Could not find steamapps folder in filepath: {filepath}")
             return{'CANCELLED'}
         Global_gamepath = filepath
-        UpdateConfig(Global_gamepath)
+        UpdateConfig()
         PrettyPrint(f"Changed Game File Path: {Global_gamepath}")
         return{'FINISHED'}
     
 class ChangeSearchpathOperator(Operator, ImportHelper):
     bl_label = "Change Searchpath"
     bl_idname = "helldiver2.change_searchpath"
+    bl_description = "Change the output directory for searching by entry ID"
     use_filter_folder = True
 
     filter_glob: StringProperty(options={'HIDDEN'}, default='')
@@ -2933,6 +2940,7 @@ class ChangeSearchpathOperator(Operator, ImportHelper):
     def execute(self, context):
         global Global_searchpath
         Global_searchpath = self.filepath
+        UpdateConfig()
         PrettyPrint(f"Changed Game Search Path: {Global_searchpath}")
         return{'FINISHED'}
 
