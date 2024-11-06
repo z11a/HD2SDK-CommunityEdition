@@ -57,6 +57,8 @@ Global_Foldouts = []
 
 Global_SectionHeader = "---------- Helldivers 2 ----------"
 
+Global_randomID = ""
+
 #endregion
 
 #region Common Hashes & Lookups
@@ -3275,18 +3277,43 @@ class DuplicateEntryOperator(Operator):
 
     NewFileID : StringProperty(name="NewFileID", default="")
     def draw(self, context):
+        global Global_randomID
+        PrettyPrint(f"Got ID: {Global_randomID}")
+        self.NewFileID = Global_randomID
         layout = self.layout; row = layout.row()
+        row.operator("helldiver2.generate_random_id", icon="FILE_REFRESH")
+        row = layout.row()
         row.prop(self, "NewFileID", icon='COPY_ID')
 
     object_id: StringProperty()
     object_typeid: StringProperty()
     def execute(self, context):
+        global Global_randomID
+        if Global_TocManager.ActivePatch == None:
+            Global_randomID = ""
+            self.report({'ERROR'}, "No Patches Currently Loaded")
+            return {'CANCELLED'}
+        if self.NewFileID == "":
+            self.report({'ERROR'}, "No ID was given")
+            return {'CANCELLED'}
         Global_TocManager.DuplicateEntry(int(self.object_id), int(self.object_typeid), int(self.NewFileID))
+        Global_randomID = ""
         return{'FINISHED'}
 
     def invoke(self, context, event):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
+    
+class GenerateEntryIDOperator(Operator):
+    bl_label = "Generate Random ID"
+    bl_idname = "helldiver2.generate_random_id"
+    bl_description = "Generates a random ID for the entry"
+
+    def execute(self, context):
+        global Global_randomID
+        Global_randomID = str(r.randint(1, 0xffffffffffffffff))
+        PrettyPrint(f"Generated random ID: {Global_randomID}")
+        return{'FINISHED'}
 
 class RenamePatchEntryOperator(Operator):
     bl_label = "Rename Entry"
@@ -4752,6 +4779,7 @@ classes = (
     BatchExportTexturePNGOperator,
     CopyDecimalIDOperator,
     CopyHexIDOperator,
+    GenerateEntryIDOperator,
 )
 
 Global_TocManager = TocManager()
