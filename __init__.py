@@ -3788,6 +3788,7 @@ class AddMaterialOperator(Operator):
             return {'CANCELLED'}
         
         Entry = TocEntry()
+        r.seed(time.time())
         Entry.FileID = r.randint(1, 0xffffffffffffffff)
         Entry.TypeID = MaterialID
         Entry.MaterialTemplate = self.selected_material
