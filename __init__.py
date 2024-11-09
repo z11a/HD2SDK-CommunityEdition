@@ -1516,7 +1516,8 @@ def GenerateMaterialTextures(Entry):
         PrettyPrint(input_socket.name)
         if input_socket.is_linked:
             for link in input_socket.links:
-                filepaths.append(link.from_node.image.filepath)
+                path = bpy.path.abspath(link.from_node.image.filepath)
+                filepaths.append(path)
     PrettyPrint(f"Found {len(filepaths)} Images: {filepaths}")
     return filepaths
 
