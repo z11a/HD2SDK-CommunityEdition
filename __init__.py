@@ -854,7 +854,7 @@ class TocEntry:
         if callback == None: raise Exception("Save Callback could not be found")
 
         if self.IsLoaded:
-            data = callback(self.FileID, self.TocData, self.GpuData, self.StreamData, self.LoadedData)
+            data = callback(self, self.FileID, self.TocData, self.GpuData, self.StreamData, self.LoadedData)
             self.SetData(data[0], data[1], data[2])
 
 class TocFileType:
@@ -1311,9 +1311,13 @@ def LoadStingrayMaterial(ID, TocData, GpuData, StreamData, Reload, MakeBlendObje
     elif force_reload: AddMaterialToBlend(ID, Material, True)
     return Material
 
-def SaveStingrayMaterial(ID, TocData, GpuData, StreamData, LoadedData):
+def SaveStingrayMaterial(self, ID, TocData, GpuData, StreamData, LoadedData):
+    if self.MaterialTemplate != None:
+        texturesFilepaths = GenerateMaterialTextures(self)
     mat = LoadedData
+    index = 0
     for TexIdx in range(len(mat.TexIDs)):
+        oldTexID = mat.TexIDs[TexIdx]
         if mat.DEV_DDSPaths[TexIdx] != None:
             # get texture data
             StingrayTex = StingrayTexture()
@@ -1340,6 +1344,13 @@ def SaveStingrayMaterial(ID, TocData, GpuData, StreamData, LoadedData):
                 Entry.IsCreated = True
                 Global_TocManager.AddNewEntryToPatch(Entry)
                 mat.TexIDs[TexIdx] = Entry.FileID
+        if self.MaterialTemplate != None:
+            path = texturesFilepaths[index]
+            if not os.path.exists(path):
+                raise Exception(f"Could not find file at path: {path}")
+            SaveImagePNG(path, Entry.FileID)
+        Global_TocManager.RemoveEntryFromPatch(oldTexID, TexID)
+        index += 1
     f = MemoryStream(IOMode="write")
     LoadedData.Serialize(f)
     return [f.Data, b"", b""]
@@ -1396,8 +1407,7 @@ def CreateAddonMaterial(ID, StingrayMat, mat, Entry):
         texImage.location = (-450, height - 300*idx)
 
         name = TextureTypeLookup[Entry.MaterialTemplate][idx]
-        if name == "Normal": socket_type = "NodeSocketVector"
-        else: socket_type = "NodeSocketColor"
+        socket_type = "NodeSocketColor"
         nodeTree.interface.new_socket(name=name, in_out ="INPUT", socket_type=socket_type).hide_value = True
 
         try:    bpy.data.images[str(TextureID)]
@@ -1425,35 +1435,40 @@ def CreateAddonMaterial(ID, StingrayMat, mat, Entry):
     bsdf.location = (50, 0)
     separateColor = nodeTree.nodes.new('ShaderNodeSeparateColor')
     separateColor.location = (-150, 0)
+    normalMap = nodeTree.nodes.new('ShaderNodeNormalMap')
+    normalMap.location = (-150, -150)
 
     bpy.ops.file.unpack_all(method='REMOVE')
     
-    if Entry.MaterialTemplate == "basic": SetupBasicBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor)
-    elif Entry.MaterialTemplate == "original": SetupOriginalBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor)
-    elif Entry.MaterialTemplate == "emissive": SetupEmissiveBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor)
+    if Entry.MaterialTemplate == "basic": SetupBasicBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor, normalMap)
+    elif Entry.MaterialTemplate == "original": SetupOriginalBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor, normalMap)
+    elif Entry.MaterialTemplate == "emissive": SetupEmissiveBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor, normalMap)
     
-def SetupBasicBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor):
+def SetupBasicBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor, normalMap):
     nodeTree.links.new(inputNode.outputs['Base Color'], bsdf.inputs['Base Color'])
-    nodeTree.links.new(inputNode.outputs['Normal'], bsdf.inputs['Normal'])
+    nodeTree.links.new(inputNode.outputs['Normal'], normalMap.inputs['Color'])
+    nodeTree.links.new(normalMap.outputs['Normal'], bsdf.inputs['Normal'])
     nodeTree.links.new(inputNode.outputs['PBR'], separateColor.inputs['Color'])
     nodeTree.links.new(separateColor.outputs['Red'], bsdf.inputs['Metallic'])
     nodeTree.links.new(separateColor.outputs['Green'], bsdf.inputs['Roughness'])
     nodeTree.links.new(bsdf.outputs['BSDF'], outputNode.inputs['Surface'])
 
-def SetupOriginalBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor):
+def SetupOriginalBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor, normalMap):
     nodeTree.links.new(inputNode.outputs['Base Color'], bsdf.inputs['Base Color'])
-    nodeTree.links.new(inputNode.outputs['Normal'], bsdf.inputs['Normal'])
+    nodeTree.links.new(inputNode.outputs['Normal'], normalMap.inputs['Color'])
+    nodeTree.links.new(normalMap.outputs['Normal'], bsdf.inputs['Normal'])
     nodeTree.links.new(inputNode.outputs['Emission'], bsdf.inputs['Emission Color'])
     nodeTree.links.new(inputNode.outputs['PBR'], separateColor.inputs['Color'])
     nodeTree.links.new(separateColor.outputs['Red'], bsdf.inputs['Metallic'])
     nodeTree.links.new(separateColor.outputs['Green'], bsdf.inputs['Roughness'])
     nodeTree.links.new(bsdf.outputs['BSDF'], outputNode.inputs['Surface'])
 
-def SetupEmissiveBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor):
+def SetupEmissiveBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor, normalMap):
     nodeTree.links.new(inputNode.outputs['Base Color/Metallic'], bsdf.inputs['Base Color'])
     nodeTree.links.new(inputNode.outputs['Emission'], bsdf.inputs['Emission Color'])
     nodeTree.links.new(inputNode.outputs['Normal/AO/Roughness'], separateColor.inputs['Color'])
-    nodeTree.links.new(separateColor.outputs['Red'], bsdf.inputs['Normal'])
+    nodeTree.links.new(separateColor.outputs['Red'], normalMap.inputs['Color'])
+    nodeTree.links.new(normalMap.outputs['Normal'], bsdf.inputs['Normal'])
     nodeTree.links.new(bsdf.outputs['BSDF'], outputNode.inputs['Surface'])
 
 def CreateGenericMaterial(ID, StingrayMat, mat):
@@ -1480,6 +1495,30 @@ def AddMaterialToBlend_EMPTY(ID):
         mat = bpy.data.materials.new(str(ID)); mat.name = str(ID)
         r.seed(ID)
         mat.diffuse_color = (r.random(), r.random(), r.random(), 1)
+
+def GenerateMaterialTextures(Entry):
+    material = group = None
+    for mat in bpy.data.materials:
+        if mat.name == str(Entry.FileID):
+            material = mat
+            break
+    if material == None:
+        raise Exception(f"Material Could not be Found ID: {Entry.FileID} {bpy.data.materials}")
+    PrettyPrint(f"Found Material {material.name} {material}")
+    for node in material.node_tree.nodes:
+        if node.type == 'GROUP':
+            group = node
+            break
+    if group == None:
+        raise Exception("Could not find node group within material")
+    filepaths = []
+    for input_socket in group.inputs:
+        PrettyPrint(input_socket.name)
+        if input_socket.is_linked:
+            for link in input_socket.links:
+                filepaths.append(link.from_node.image.filepath)
+    PrettyPrint(f"Found {len(filepaths)} Images: {filepaths}")
+    return filepaths
 
 #endregion
 
@@ -1609,7 +1648,7 @@ def BlendImageToStingrayTexture(image, StingrayTex):
     else:
         raise Exception("Failed to convert TGA to DDS")
 
-def SaveStingrayTexture(ID, TocData, GpuData, StreamData, LoadedData):
+def SaveStingrayTexture(self, ID, TocData, GpuData, StreamData, LoadedData):
     exists = True
     try: bpy.data.images[str(ID)]
     except: exists = False
@@ -2665,7 +2704,7 @@ def LoadStingrayMesh(ID, TocData, GpuData, StreamData, Reload, MakeBlendObject):
     if MakeBlendObject: CreateModel(StingrayMesh.RawMeshes, str(ID), StingrayMesh.CustomizationInfo, StingrayMesh.BoneNames)
     return StingrayMesh
 
-def SaveStingrayMesh(ID, TocData, GpuData, StreamData, StingrayMesh):
+def SaveStingrayMesh(self, ID, TocData, GpuData, StreamData, StingrayMesh):
     model = GetObjectsMeshData()
     FinalMeshes = [mesh for mesh in StingrayMesh.RawMeshes]
     for mesh in model:
@@ -3709,30 +3748,7 @@ class SaveTextureFromPNGOperator(Operator, ImportHelper):
     def execute(self, context):
         if PatchesNotLoaded(self):
             return {'CANCELLED'}
-        Entry = Global_TocManager.GetEntry(int(self.object_id), TexID)
-        if Entry != None:
-            if len(self.filepath) > 1:
-                # get texture data
-                Entry.Load()
-                StingrayTex = Entry.LoadedData
-                tempdir = tempfile.gettempdir()
-                PrettyPrint(self.filepath)
-                PrettyPrint(StingrayTex.Format)
-                subprocess.run([Global_texconvpath, "-y", "-o", tempdir, "-ft", "dds", "-dx10", "-f", StingrayTex.Format, self.filepath], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-                nameIndex = self.filepath.rfind("\.".strip(".")) + 1
-                fileName = self.filepath[nameIndex:].replace(".png", ".dds")
-                dds_path = f"{tempdir}\\{fileName}"
-                PrettyPrint(dds_path)
-                with open(dds_path, 'r+b') as f:
-                    StingrayTex.FromDDS(f.read())
-                Toc = MemoryStream(IOMode="write")
-                Gpu = MemoryStream(IOMode="write")
-                Stream = MemoryStream(IOMode="write")
-                StingrayTex.Serialize(Toc, Gpu, Stream)
-                # add texture to entry
-                Entry.SetData(Toc.Data, Gpu.Data, Stream.Data, False)
-
-                Global_TocManager.Save(int(self.object_id), TexID)
+        SaveImagePNG(self.filepath, self.object_id)
         
         # Redraw
         for area in context.screen.areas:
@@ -3740,6 +3756,31 @@ class SaveTextureFromPNGOperator(Operator, ImportHelper):
 
         return{'FINISHED'}
 
+def SaveImagePNG(filepath, object_id):
+    Entry = Global_TocManager.GetEntry(int(object_id), TexID)
+    if Entry != None:
+        if len(filepath) > 1:
+            # get texture data
+            Entry.Load()
+            StingrayTex = Entry.LoadedData
+            tempdir = tempfile.gettempdir()
+            PrettyPrint(filepath)
+            PrettyPrint(StingrayTex.Format)
+            subprocess.run([Global_texconvpath, "-y", "-o", tempdir, "-ft", "dds", "-dx10", "-f", StingrayTex.Format, filepath], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            nameIndex = filepath.rfind("\.".strip(".")) + 1
+            fileName = filepath[nameIndex:].replace(".png", ".dds")
+            dds_path = f"{tempdir}\\{fileName}"
+            PrettyPrint(dds_path)
+            with open(dds_path, 'r+b') as f:
+                StingrayTex.FromDDS(f.read())
+            Toc = MemoryStream(IOMode="write")
+            Gpu = MemoryStream(IOMode="write")
+            Stream = MemoryStream(IOMode="write")
+            StingrayTex.Serialize(Toc, Gpu, Stream)
+            # add texture to entry
+            Entry.SetData(Toc.Data, Gpu.Data, Stream.Data, False)
+
+            Global_TocManager.Save(int(object_id), TexID)
 #endregion
 
 #region Operators: Materials
@@ -4298,9 +4339,10 @@ class HellDivers2ToolsPanel(Panel):
                     row = layout.row(); row.separator(factor=2.0)
                     ddsPath = mat.DEV_DDSPaths[i]
                     if ddsPath != None: filepath = Path(ddsPath)
-                    prefix = TextureTypeLookup[Entry.MaterialTemplate][i] if Entry.MaterialTemplate != None else ""
                     label = filepath.name if ddsPath != None else str(t)
-                    row.operator("helldiver2.material_texture_entry", icon='FILE_IMAGE', text=prefix+label, emboss=False) 
+                    if Entry.MaterialTemplate != None:
+                        label = TextureTypeLookup[Entry.MaterialTemplate][i] + ": " + label
+                    row.operator("helldiver2.material_texture_entry", icon='FILE_IMAGE', text=label, emboss=False) 
                     # props = row.operator("helldiver2.material_settex", icon='FILEBROWSER', text="")
                     # props.object_id = str(Entry.FileID)
                     # props.tex_idx = i
@@ -4313,10 +4355,10 @@ class HellDivers2ToolsPanel(Panel):
             row.operator("helldiver2.texture_saveblendimage", icon='FILE_BLEND', text="").object_id = str(Entry.FileID)
             row.operator("helldiver2.texture_import", icon='IMPORT', text="").object_id = str(Entry.FileID)
         elif Entry.TypeID == MaterialID:
+            row.operator("helldiver2.material_save", icon='FILE_BLEND', text="").object_id = str(Entry.FileID)
             if Entry.MaterialTemplate == None:
-                row.operator("helldiver2.material_save", icon='FILE_BLEND', text="").object_id = str(Entry.FileID)
                 row.operator("helldiver2.material_import", icon='IMPORT', text="").object_id = str(Entry.FileID)
-                row.operator("helldiver2.material_showeditor", icon='MOD_LINEART', text="").object_id = str(Entry.FileID)
+            row.operator("helldiver2.material_showeditor", icon='MOD_LINEART', text="").object_id = str(Entry.FileID)
             self.draw_material_editor(Entry, box, row)
         if Global_TocManager.IsInPatch(Entry):
             props = row.operator("helldiver2.archive_removefrompatch", icon='FAKE_USER_ON', text="")
@@ -4690,7 +4732,7 @@ class WM_MT_button_context(Menu):
                 row.separator()
                 row.operator("helldiver2.texture_batchexport", icon='OUTLINER_OB_IMAGE', text=f"Export {NumSelected} DDS Textures").object_id = FileIDStr
                 row.operator("helldiver2.texture_batchexport_png", icon='OUTLINER_OB_IMAGE', text=f"Export {NumSelected} PNG Textures").object_id = FileIDStr
-        elif AreAllMaterials and Entry.MaterialTemplate == None:
+        elif AreAllMaterials:
             row.operator("helldiver2.material_save", icon='FILE_BLEND', text=SaveMaterialName).object_id = FileIDStr
         # Draw copy ID buttons
         if SingleEntry:
