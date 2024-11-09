@@ -1438,6 +1438,8 @@ def CreateAddonMaterial(ID, StingrayMat, mat, Entry):
     normalMap = nodeTree.nodes.new('ShaderNodeNormalMap')
     normalMap.location = (-150, -150)
 
+    bsdf.inputs['Emission Strength'].default_value = 1
+
     bpy.ops.file.unpack_all(method='REMOVE')
     
     if Entry.MaterialTemplate == "basic": SetupBasicBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor, normalMap)
