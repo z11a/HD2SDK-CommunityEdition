@@ -3552,6 +3552,7 @@ class BatchSaveStingrayMeshOperator(Operator):
         return{'FINISHED'}
 
 def SaveMeshMaterials(objects):
+    PrettyPrint(f"Saving materials for {len(objects)} objects")
     materials = []
     for object in objects:
         for slot in object.material_slots:
@@ -3565,6 +3566,7 @@ def SaveMeshMaterials(objects):
                 if material not in materials:
                     materials.append(material)
 
+    PrettyPrint(f"Found {len(materials)} unique materials")
     for material in materials:
         try:
             ID = int(material.name)
@@ -3578,10 +3580,14 @@ def SaveMeshMaterials(objects):
         else:
             PrettyPrint(f"Creating material for: {ID}")
             
+            nodeName = None
             for node in material.node_tree.nodes:
                 if node.type == 'GROUP':
                     nodeName = node.node_tree.name
                     break
+            if not nodeName:
+                PrettyPrint(f"Cancelling Making Material for: {ID}")
+                return
             if "-" in nodeName:
                 template = nodeName.split("-")[0]
                 PrettyPrint(f"Creating material: {ID} with template: {template}")
