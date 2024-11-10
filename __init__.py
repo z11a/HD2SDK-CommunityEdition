@@ -1447,6 +1447,7 @@ def CreateAddonMaterial(ID, StingrayMat, mat, Entry):
     elif Entry.MaterialTemplate == "emissive": SetupEmissiveBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor, normalMap)
     
 def SetupBasicBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor, normalMap):
+    bsdf.inputs['Emission Strength'].default_value = 0
     nodeTree.links.new(inputNode.outputs['Base Color'], bsdf.inputs['Base Color'])
     nodeTree.links.new(inputNode.outputs['Normal'], normalMap.inputs['Color'])
     nodeTree.links.new(normalMap.outputs['Normal'], bsdf.inputs['Normal'])
