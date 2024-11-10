@@ -1518,6 +1518,8 @@ def GenerateMaterialTextures(Entry):
         PrettyPrint(input_socket.name)
         if input_socket.is_linked:
             for link in input_socket.links:
+                if link.from_node.image.packed_file:
+                    raise Exception(f"Image: {link.from_node.image.name} is packed")
                 path = bpy.path.abspath(link.from_node.image.filepath)
                 filepaths.append(path)
     PrettyPrint(f"Found {len(filepaths)} Images: {filepaths}")
