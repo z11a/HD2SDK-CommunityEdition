@@ -3542,8 +3542,47 @@ class BatchSaveStingrayMeshOperator(Operator):
                         PrettyPrint(f"Couldn't find Object: {object.name} at ID: {ID}")
                 self.report({'ERROR'}, f"Archive for entry being saved is not loaded. Could not find custom property object at ID: {ID}")
                 return{'CANCELLED'}
+        SaveMeshMaterials(objects)
         self.report({'INFO'}, f"Saved {len(objects)} Meshes")
         return{'FINISHED'}
+
+def SaveMeshMaterials(objects):
+    materials = []
+    for object in objects:
+        for slot in object.material_slots:
+            if slot.material:
+                materialName = slot.material.name
+                PrettyPrint(f"Found material: {materialName} in {object.name}")
+                try: 
+                    material = bpy.data.materials[materialName]
+                except:
+                    raise Exception(f"Could not find material: {materialName}")
+                if material not in materials:
+                    materials.append(material)
+
+    for material in materials:
+        try:
+            ID = int(material.name)
+        except:
+            continue
+        entry = Global_TocManager.GetEntry(ID, MaterialID)
+        if entry:
+            if not entry.IsModified:
+                PrettyPrint(f"Saving material: {ID}")
+                Global_TocManager.Save(ID, MaterialID)
+        else:
+            PrettyPrint(f"Creating material for: {ID}")
+            
+            for node in material.node_tree.nodes:
+                if node.type == 'GROUP':
+                    nodeName = node.node_tree.name
+                    break
+            if "-" in nodeName:
+                template = nodeName.split("-")[0]
+                PrettyPrint(f"Creating material: {ID} with template: {template}")
+                CreateModdedMaterial(template, ID)
+                Global_TocManager.Save(ID, MaterialID)
+
 
 #endregion
 
@@ -3831,23 +3870,7 @@ class AddMaterialOperator(Operator):
         if PatchesNotLoaded(self):
             return {'CANCELLED'}
         
-        Entry = TocEntry()
-        r.seed(time.time())
-        Entry.FileID = r.randint(1, 0xffffffffffffffff)
-        Entry.TypeID = MaterialID
-        Entry.MaterialTemplate = self.selected_material
-        Entry.IsCreated = True
-        with open(f"{Global_materialpath}\\{self.selected_material}.material", 'r+b') as f:
-            data = f.read()
-        Entry.TocData_OLD   = data
-        Entry.TocData       = data
-
-        Global_TocManager.AddNewEntryToPatch(Entry)
-
-        
-        EntriesIDs = IDsFromString(str(Entry.FileID))
-        for EntryID in EntriesIDs:
-            Global_TocManager.Load(int(EntryID), MaterialID)
+        CreateModdedMaterial(self.selected_material)
 
         # Redraw
         for area in context.screen.areas:
@@ -3857,6 +3880,32 @@ class AddMaterialOperator(Operator):
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
+
+def CreateModdedMaterial(template, ID=None):
+    path = f"{Global_materialpath}\\{template}.material"
+    if not os.path.exists(path):
+        raise Exception(f"Selected material template: {template} does not exist")
+
+    Entry = TocEntry()
+    if ID == None:
+        r.seed(time.time())
+        Entry.FileID = r.randint(1, 0xffffffffffffffff)
+    else:
+        Entry.FileID = ID
+
+    Entry.TypeID = MaterialID
+    Entry.MaterialTemplate = template
+    Entry.IsCreated = True
+    with open(path, 'r+b') as f:
+        data = f.read()
+    Entry.TocData_OLD   = data
+    Entry.TocData       = data
+
+    Global_TocManager.AddNewEntryToPatch(Entry)
+        
+    EntriesIDs = IDsFromString(str(Entry.FileID))
+    for EntryID in EntriesIDs:
+        Global_TocManager.Load(int(EntryID), MaterialID)
 
 class ShowMaterialEditorOperator(Operator):
     bl_label = "Show Material Editor"
