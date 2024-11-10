@@ -2837,6 +2837,8 @@ def MaterialsNumberNames(self):
             if slot.material:
                 if not slot.material.name.isnumeric():
                     invalidMaterials += 1
+            else:
+                invalidMaterials += 1
         if invalidMaterials > 0:
             self.report({'ERROR'}, f"Object: {mesh.name} has {invalidMaterials} non Helldivers 2 Materials")
             return True
