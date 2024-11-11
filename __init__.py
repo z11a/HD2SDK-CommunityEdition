@@ -2792,8 +2792,8 @@ def IncorrectVertexGroupNaming(self):
             self.report({'ERROR'}, f"Found {incorrectGroups} Incorrect Vertex Group Name Scheming for Object: {obj.name}")
             return True
         if len(groups) != len(obj.vertex_groups):
-            self.report({'ERROR'}, f"Object: {obj.name} has a different number of vertex groups than expected")
-            return True
+            self.report({'WARNING'}, f"Object: {obj.name} has a different number of vertex groups than expected")
+            return False
     return False
 
 def ObjectHasModifiers(self):
@@ -3583,7 +3583,7 @@ def SaveMeshMaterials(objects):
 
         if nodeName == "" and not bpy.context.scene.Hd2ToolPanelSettings.SaveNonSDKMaterials:
             PrettyPrint(f"Cancelling Saving Material: {ID}")
-            return
+            continue
 
         entry = Global_TocManager.GetEntry(ID, MaterialID)
         if entry:
