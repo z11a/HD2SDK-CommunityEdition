@@ -3566,33 +3566,40 @@ def SaveMeshMaterials(objects):
                 if material not in materials:
                     materials.append(material)
 
-    PrettyPrint(f"Found {len(materials)} unique materials")
+    PrettyPrint(f"Found {len(materials)} unique materials {materials}")
     for material in materials:
         try:
             ID = int(material.name)
         except:
+            PrettyPrint(f"Failed to convert material: {material.name} to ID")
             continue
+
+        nodeName = ""
+        for node in material.node_tree.nodes:
+            if node.type == 'GROUP':
+                nodeName = node.node_tree.name
+                PrettyPrint(f"ID: {ID} Group: {nodeName}")
+                break
+
+        if nodeName == "" and not bpy.context.scene.Hd2ToolPanelSettings.SaveNonSDKMaterials:
+            PrettyPrint(f"Cancelling Saving Material: {ID}")
+            return
+
         entry = Global_TocManager.GetEntry(ID, MaterialID)
         if entry:
             if not entry.IsModified:
                 PrettyPrint(f"Saving material: {ID}")
                 Global_TocManager.Save(ID, MaterialID)
-        else:
-            PrettyPrint(f"Creating material for: {ID}")
-            
-            nodeName = None
-            for node in material.node_tree.nodes:
-                if node.type == 'GROUP':
-                    nodeName = node.node_tree.name
-                    break
-            if not nodeName:
-                PrettyPrint(f"Cancelling Making Material for: {ID}")
-                return
-            if "-" in nodeName:
+            else:
+                PrettyPrint(f"Skipping Saving Material: {ID} as it already has been modified")
+        elif "-" in nodeName:
+            if nodeName.split("-")[1] == str(ID):
                 template = nodeName.split("-")[0]
                 PrettyPrint(f"Creating material: {ID} with template: {template}")
                 CreateModdedMaterial(template, ID)
                 Global_TocManager.Save(ID, MaterialID)
+        else:
+            PrettyPrint(f"Failed to save material: {ID}", "error")
 
 
 #endregion
@@ -4385,7 +4392,9 @@ class Hd2ToolPanelSettings(PropertyGroup):
     UnloadEmptyArchives   : BoolProperty(name="Unload Empty Archives", description="Unload Archives that do not Contain any Textures, Materials, or Meshes", default = True)
     DeleteOnLoadArchive   : BoolProperty(name="Nuke Files on Archive Load", description="Delete all Textures, Materials, and Meshes in project when selecting a new archive", default = False)
     ForceSearchAll        : BoolProperty(name="Force Search All Files", description="Searches for all IDs in every file instead of ending early")
-    UnloadPatches     : BoolProperty(name="Unload Previous Patches", description="Unload Previous Patches when bulk loading")
+    UnloadPatches         : BoolProperty(name="Unload Previous Patches", description="Unload Previous Patches when bulk loading")
+
+    SaveNonSDKMaterials   : BoolProperty(name="Save Non-SDK Materials", description="Toggle if non-SDK materials should be autosaved when saving a mesh", default = False)
 
 class HellDivers2ToolsPanel(Panel):
     bl_label = f"Helldivers 2 SDK: Community Edition v{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}"
@@ -4475,6 +4484,8 @@ class HellDivers2ToolsPanel(Panel):
             row.prop(scene.Hd2ToolPanelSettings, "Force2UVs")
             row.prop(scene.Hd2ToolPanelSettings, "Force1Group")
             row.prop(scene.Hd2ToolPanelSettings, "AutoLods")
+            row = mainbox.row(); row.separator(); row.label(text="Save Options"); box = row.box(); row = box.grid_flow(columns=1)
+            row.prop(scene.Hd2ToolPanelSettings, "SaveNonSDKMaterials")
             #Custom Searching tools
             row = mainbox.row(); row.separator(); row.label(text="Research Tools"); box = row.box(); row = box.grid_flow(columns=1)
             # Draw Bulk Loader Extras
