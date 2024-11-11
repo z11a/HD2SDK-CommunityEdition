@@ -1348,7 +1348,9 @@ def SaveStingrayMaterial(self, ID, TocData, GpuData, StreamData, LoadedData):
             path = texturesFilepaths[index]
             if not os.path.exists(path):
                 raise Exception(f"Could not find file at path: {path}")
-            SaveImagePNG(path, Entry.FileID)
+            if not Entry:
+                raise Exception(f"Could not find or generate texture entry")
+            SaveImagePNG(path, Entry.FileID)    
         Global_TocManager.RemoveEntryFromPatch(oldTexID, TexID)
         index += 1
     f = MemoryStream(IOMode="write")
