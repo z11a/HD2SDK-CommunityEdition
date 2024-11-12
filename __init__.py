@@ -4010,6 +4010,7 @@ class CopyTextOperator(Operator):
     def execute(self, context):
         cmd='echo '+str(self.text).strip()+'|clip'
         subprocess.check_call(cmd, shell=True)
+        self.report({'INFO'}, f"Copied: {self.text}")
         return{'FINISHED'}
 
 #endregion
@@ -4251,13 +4252,12 @@ def CustomPropertyContext(self, context):
     layout.separator()
     layout.label(text=Global_SectionHeader)
     layout.separator()
+    layout.operator("helldiver2.copy_hex_id", icon='COPY_ID')
+    layout.operator("helldiver2.copy_decimal_id", icon='COPY_ID')
+    layout.separator()
     layout.operator("helldiver2.copy_custom_properties", icon= 'COPYDOWN')
     layout.operator("helldiver2.paste_custom_properties", icon= 'PASTEDOWN')
     layout.operator("helldiver2.archive_mesh_batchsave", icon= 'FILE_BLEND')
-    if bpy.context.scene.Hd2ToolPanelSettings.EnableTools:
-        layout.separator()
-        layout.operator("helldiver2.copy_hex_id", icon='COPY_ID')
-        layout.operator("helldiver2.copy_decimal_id", icon='COPY_ID')
 
 class CopyArchiveIDOperator(Operator):
     bl_label = "Copy Archive ID"
@@ -4280,6 +4280,8 @@ class CopyHexIDOperator(Operator):
 
     def execute(self, context):
         object = context.active_object
+        if not object:
+            self.report({"ERROR"}, "No object is selected")
         try:
             ID = int(object["Z_ObjectID"])
         except:
@@ -4302,8 +4304,9 @@ class CopyDecimalIDOperator(Operator):
     bl_description = "Copy the decimal ID of the selected mesh"
 
     def execute(self, context):
-        
         object = context.active_object
+        if not object:
+            self.report({"ERROR"}, "No object is selected")
         try:
             ID = str(object["Z_ObjectID"])
         except:
@@ -4814,6 +4817,7 @@ class WM_MT_button_context(Menu):
         if SingleEntry:
             row.separator()
             row.operator("helldiver2.copytest", icon='COPY_ID', text="Copy Entry ID").text = str(Entry.FileID)
+            row.operator("helldiver2.copytest", icon='COPY_ID', text="Copy Entry Hex ID").text = str(hex(Entry.FileID))
             row.operator("helldiver2.copytest", icon='COPY_ID', text="Copy Type ID").text  = str(Entry.TypeID)
             row.operator("helldiver2.copytest", icon='COPY_ID', text="Copy Friendly Name").text  = GetFriendlyNameFromID(Entry.FileID)
             if Global_TocManager.IsInPatch(Entry):
