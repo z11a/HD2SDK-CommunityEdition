@@ -163,6 +163,10 @@ def IDsFromString(file_id_string):
             Entries.append(int(FileIDs[n]))
     return Entries
 
+def GenerateRandomID(min=1, max=0xffffffffffffffff):
+    r.seed(time.time())
+    return r.randint(min, max)
+
 def GetDisplayData():
     # Set display archive TODO: Global_TocManager.LastSelected Draw Index could be wrong if we switch to patch only mode, that should be fixed
     DisplayTocEntries = []
@@ -1163,7 +1167,7 @@ class TocManager():
             dup.IsCreated = True
             # if self.ActivePatch.GetEntry(dup.FileID, dup.TypeID) != None and NewID == None:
             #     GenID = True
-            if GenID and NewID == None: dup.FileID = r.randint(1, 0xffffffffffffffff)
+            if GenID and NewID == None: dup.FileID = GenerateRandomID()
             if NewID != None:
                 dup.FileID = NewID
 
@@ -1329,7 +1333,7 @@ def SaveStingrayMaterial(self, ID, TocData, GpuData, StreamData, LoadedData):
             StingrayTex.Serialize(Toc, Gpu, Stream)
             # add texture entry to archive
             Entry = TocEntry()
-            Entry.FileID = r.randint(1, 0xffffffffffffffff)
+            Entry.FileID = GenerateRandomID()
             Entry.TypeID = TexID
             Entry.IsCreated = True
             Entry.SetData(Toc.Data, Gpu.Data, Stream.Data, False)
@@ -1340,7 +1344,7 @@ def SaveStingrayMaterial(self, ID, TocData, GpuData, StreamData, LoadedData):
             Entry = Global_TocManager.GetEntry(int(mat.TexIDs[TexIdx]), TexID, True)
             if Entry != None:
                 Entry = deepcopy(Entry)
-                Entry.FileID = r.randint(1, 0xffffffffffffffff)
+                Entry.FileID = GenerateRandomID()
                 Entry.IsCreated = True
                 Global_TocManager.AddNewEntryToPatch(Entry)
                 mat.TexIDs[TexIdx] = Entry.FileID
@@ -2100,7 +2104,7 @@ class RawMaterialClass:
         else:
             try:
                 self.MatID   = int(name)
-                self.ShortID = r.randint(1, 0xffffffff)
+                self.ShortID = GenerateRandomID(max=0xffffffff)
             except:
                 raise Exception("Material name must be a number")
 
@@ -3360,7 +3364,7 @@ class GenerateEntryIDOperator(Operator):
 
     def execute(self, context):
         global Global_randomID
-        Global_randomID = str(r.randint(1, 0xffffffffffffffff))
+        Global_randomID = str(GenerateRandomID())
         PrettyPrint(f"Generated random ID: {Global_randomID}")
         return{'FINISHED'}
 
@@ -3908,8 +3912,7 @@ def CreateModdedMaterial(template, ID=None):
 
     Entry = TocEntry()
     if ID == None:
-        r.seed(time.time())
-        Entry.FileID = r.randint(1, 0xffffffffffffffff)
+        Entry.FileID = GenerateRandomID()
     else:
         Entry.FileID = ID
 
