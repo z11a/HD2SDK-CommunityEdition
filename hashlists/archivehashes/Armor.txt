@@ -51,13 +51,23 @@ f1175472a3f1469a CE-64 Grenadier
 8079db396fbfd31c CE-67 Titan
 813da450b8029cb2 FS-38 Eradicator
 bb8d9bee0012e672 DP-11 Champion of the People
-c04df62c527e2761 TR-9 Cavalier of 
+c04df62c527e2761 TR-9 Cavalier of Democracy
 d451ab9c17f64b19 CW-4 Arctic Ranger
 f1973d347198bd6f EX-16 Prototype 16
 784acdd4158a9a42 CM-10 Clinician
 8ade54353acbe39d CE-74 Breaker
 4ceb3d4e31097c68 CE-35 Trench Engineer
 1683ee92e6aec3eb I-44 Salamander
-57cebd7e5f985d45 I-102 Draco
+57cebd7e5f985d45 I-102 Draconaught
 78c4f1839dea282d I-92 Fire Fighter
 b6f3029666a39fe8 I-09 Heatseeker
+fda9b1496320364e AF-91 Field Chemist
+681a512c5a5c0de7 AF-91 Field Chemist
+62c6fbc5cd90448d AF-91 Field Chemist
+cbfe5ddf73d50785 AF-02 Haz-Master
+3d8cf2088ed56091 DP-00 Tactical
+0fecb336be1d287b UF-84 Doubt Killer
+871290e9d5703851 UF-50 Bloodhound
+19b5a68e61d7a9d7 UF-16 Inspector
+b2d7f35cb2ab24ce AF-52 Lockdown
+86a9bdfc23c01517 AF-50 Noxious Ranger
