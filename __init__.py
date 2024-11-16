@@ -519,7 +519,11 @@ def CreateModel(model, id, customization_info, bone_names):
         bm.from_mesh(new_object.data)
         # assign materials
         matNum = 0
+        goreIndex = None
         for material in mesh.Materials:
+            if str(material.MatID) == "12070197922454493211":
+                goreIndex = matNum
+                PrettyPrint(f"Found gore material at index: {matNum}")
             # append material to slot
             try: new_object.data.materials.append(bpy.data.materials[material.MatID])
             except: raise Exception(f"Tool was unable to find material that this mesh uses, ID: {material.MatID}")
@@ -529,6 +533,17 @@ def CreateModel(model, id, customization_info, bone_names):
             for f in bm.faces[StartIndex:(numTris+(StartIndex))]:
                 f.material_index = matNum
             matNum += 1
+        # remove gore mesh
+        if bpy.context.scene.Hd2ToolPanelSettings.RemoveGoreMeshes and goreIndex:
+            PrettyPrint(f"Removing Gore Mesh")
+            verticies = []
+            for vert in bm.verts:
+                if len(vert.link_faces) == 0:
+                    continue
+                if vert.link_faces[0].material_index == goreIndex:
+                    verticies.append(vert)
+            for vert in verticies:
+                bm.verts.remove(vert)
         # convert bmesh to mesh
         bm.to_mesh(new_object.data)
 
@@ -4389,6 +4404,7 @@ class Hd2ToolPanelSettings(PropertyGroup):
     Force2UVs        : BoolProperty(name="Force 2 UV Sets", description = "Force at least 2 UV sets, some materials require this", default = True)
     Force1Group      : BoolProperty(name="Force 1 Group", description = "Force mesh to only have 1 vertex group", default = True)
     AutoLods         : BoolProperty(name="Auto LODs", description = "Automatically generate LOD entries based on LOD0, does not actually reduce the quality of the mesh", default = True)
+    RemoveGoreMeshes : BoolProperty(name="Remove Gore Meshes", description = "Automatically delete all of the verticies with the gore mesh when loading a model", default = False)
     # Search
     SearchField      : StringProperty(default = "")
 
@@ -4485,6 +4501,7 @@ class HellDivers2ToolsPanel(Panel):
             row.prop(scene.Hd2ToolPanelSettings, "MakeCollections")
             row.prop(scene.Hd2ToolPanelSettings, "ImportPhysics")
             row.prop(scene.Hd2ToolPanelSettings, "ImportStatic")
+            row.prop(scene.Hd2ToolPanelSettings, "RemoveGoreMeshes")
             row = mainbox.row(); row.separator(); row.label(text="Export Options"); box = row.box(); row = box.grid_flow(columns=1)
             row.prop(scene.Hd2ToolPanelSettings, "Force2UVs")
             row.prop(scene.Hd2ToolPanelSettings, "Force1Group")
