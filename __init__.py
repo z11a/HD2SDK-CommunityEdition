@@ -4404,7 +4404,7 @@ class Hd2ToolPanelSettings(PropertyGroup):
     Force2UVs        : BoolProperty(name="Force 2 UV Sets", description = "Force at least 2 UV sets, some materials require this", default = True)
     Force1Group      : BoolProperty(name="Force 1 Group", description = "Force mesh to only have 1 vertex group", default = True)
     AutoLods         : BoolProperty(name="Auto LODs", description = "Automatically generate LOD entries based on LOD0, does not actually reduce the quality of the mesh", default = True)
-    RemoveGoreMeshes : BoolProperty(name="Remove Gore Meshes", description = "Automatically delete all of the verticies with the gore mesh when loading a model", default = False)
+    RemoveGoreMeshes : BoolProperty(name="Remove Gore Meshes", description = "Automatically delete all of the verticies with the gore material when loading a model", default = False)
     # Search
     SearchField      : StringProperty(default = "")
 
