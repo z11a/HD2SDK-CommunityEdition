@@ -107,12 +107,12 @@ TextureTypeLookup = {
         "", 
         "", 
         "", 
-        "",
+        "Blank Normal (not required)",
         "Normal",
         "",
         "Emission (not required)",
-        "",
-        "Diffuse",
+        "Blank Normal (not required)",
+        "Base Color",
         "",
         "",
         ""  
@@ -121,7 +121,7 @@ TextureTypeLookup = {
         "Metallic",
         "Roughness",
         "AO (not required)",
-        "Diffuse",
+        "Base Color",
         "Normal"
     ),
     "emissive_auto": (
@@ -129,8 +129,7 @@ TextureTypeLookup = {
         "AO (not required)",
         "Cavity (not required)",
         "Emission",
-        "Diffuse",
-        "Metallic"
+        "Base Color"
     )
 }
 
@@ -1460,19 +1459,15 @@ def CreateAddonMaterial(ID, StingrayMat, mat, Entry):
         socket_type = "NodeSocketColor"
         nodeTree.interface.new_socket(name=name, in_out ="INPUT", socket_type=socket_type).hide_value = True
 
+        # first try default images with (not required in the name)
+        texImage.image = LoadDefaultTexture(name)
+
         try:    bpy.data.images[str(TextureID)]
         except: Global_TocManager.Load(TextureID, TexID, False, True)
         try: texImage.image = bpy.data.images[str(TextureID)]
         except:
             PrettyPrint(f"Failed to load texture {TextureID}. This is not fatal, but does mean that the materials in Blender will have empty image texture nodes", "warn")
             pass
-
-        # default images
-        if name == "SSS (not required)" or name == "Emission (not required)":
-            texImage.image = (bpy.data.images.load(f"{__file__}\\..\\textures\\black.png"))
-        elif name == "AO (not required)" or name == "Cavity (not required)":
-            texImage.image = (bpy.data.images.load(f"{__file__}\\..\\textures\\white.png"))
-        # add other defaults from poros slides
 
         mat.node_tree.links.new(texImage.outputs['Color'], group.inputs[idx])
         idx +=1
@@ -1499,6 +1494,16 @@ def CreateAddonMaterial(ID, StingrayMat, mat, Entry):
     elif Entry.MaterialTemplate == "original": SetupOriginalBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor)
     elif Entry.MaterialTemplate == "emissive": SetupEmissiveBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor)
     
+def LoadDefaultTexture(name):
+    if name == "SSS (not required)" or name == "Emission (not required)":
+        return (bpy.data.images.load(f"{__file__}\\..\\textures\\black.png"))
+    elif name == "AO (not required)" or name == "Cavity (not required)":
+        return (bpy.data.images.load(f"{__file__}\\..\\textures\\white.png"))
+    elif name == "Blank Normal (not required)":
+        return (bpy.data.images.load(f"{__file__}\\..\\textures\\blank_normal.png"))
+    elif name == "Emission (not required)":
+        return (bpy.data.images.load(f"{__file__}\\..\\textures\\blank.png"))
+
 def SetupBasicBlenderMaterial(nodeTree, inputNode, outputNode, bsdf, separateColor):
     nodeTree.links.new(inputNode.outputs['Base Color'], bsdf.inputs['Base Color'])
     nodeTree.links.new(inputNode.outputs['Normal'], bsdf.inputs['Normal'])
