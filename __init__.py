@@ -1457,6 +1457,7 @@ def CreateAddonMaterial(ID, StingrayMat, mat, Entry):
             texImage.image = (bpy.data.images.load(f"{__file__}\\..\\textures\\black.png"))
         elif name == "AO (not required)" or name == "Cavity (not required)":
             texImage.image = (bpy.data.images.load(f"{__file__}\\..\\textures\\white.png"))
+        # add other defaults from poros slides
 
         mat.node_tree.links.new(texImage.outputs['Color'], group.inputs[idx])
         idx +=1
